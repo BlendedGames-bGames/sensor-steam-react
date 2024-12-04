@@ -1,0 +1,38 @@
+{
+  "name": "sensor-steam-react",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "public/electron.js",
+  "scripts": {
+    "dev": "vite",
+    "electron": "electron .",
+    "server": "nodemon server.js",
+    "start": "concurrently \"npm run dev\" \"npm run electron\" \"npm run server\"",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "axios": "^1.7.8",
+    "better-sqlite3": "^11.6.0",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "electron": "^33.2.0",
+    "express": "^4.21.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "globals": "^15.12.0",
+    "nodemon": "^3.1.7",
+    "vite": "^6.0.0"
+  }
+}
