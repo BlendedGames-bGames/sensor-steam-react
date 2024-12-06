@@ -20,7 +20,7 @@ function Dashboard() {
       try {
         const response = await axios.get("http://localhost:8080/users/allPoints");
 
-        if (response.status === 201 && response.data.response.length > 0) {
+        if (response.status === 201 && response.data.response.length > 0) { // Correguir esto, es 200 el status
           const sensorPoints = response.data.response; // Acceder al arreglo "response"
           // Validar que hay al menos un elemento en el arreglo
           if (sensorPoints.length == 1) {

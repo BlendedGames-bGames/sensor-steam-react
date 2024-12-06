@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 sensor-steam-db.db
+out
 *.local
 
 # Editor directories and files
@@ -23,3 +24,5 @@ sensor-steam-db.db
 *.njsproj
 *.sln
 *.sw?
+
+out/

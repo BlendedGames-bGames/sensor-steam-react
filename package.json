@@ -1,5 +1,7 @@
 {
   "name": "sensor-steam-react",
+  "author": "Sensor Steam",
+  "description": "Sensor Steam React App",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,25 +10,39 @@
     "dev": "vite",
     "electron": "electron .",
     "server": "nodemon server.js",
-    "start": "concurrently \"npm run dev\" \"npm run electron\" \"npm run server\"",
-    "build": "vite build"
+    "start": "electron-forge start",
+    "build": "vite build",
+    "make": "electron-forge make",
+    "build:frontend": "vite build",
+    "start:electron": "electron .",
+    "start:backend": "nodemon server.js",
+    "package": "electron-forge package"
   },
   "dependencies": {
     "axios": "^1.7.8",
     "body-parser": "^1.20.3",
     "cors": "^2.8.5",
-    "electron": "^33.2.0",
+    "electron-squirrel-startup": "^1.0.1",
     "express": "^4.21.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^7.6.0",
+    "@electron-forge/maker-deb": "^7.6.0",
+    "@electron-forge/maker-rpm": "^7.6.0",
+    "@electron-forge/maker-squirrel": "^7.6.0",
+    "@electron-forge/maker-zip": "^7.6.0",
+    "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
+    "@electron-forge/plugin-fuses": "^7.6.0",
+    "@electron/fuses": "^1.8.0",
     "@eslint/js": "^9.15.0",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.0",
+    "electron": "^33.2.1",
     "eslint": "^9.15.0",
     "eslint-plugin-react": "^7.37.2",
     "eslint-plugin-react-hooks": "^5.0.0",
@@ -34,5 +50,17 @@
     "globals": "^15.12.0",
     "nodemon": "^3.1.7",
     "vite": "^6.0.0"
+  },
+  "config": {
+    "forge": {
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "sensor_steam_app"
+          }
+        }
+      ]
+    }
   }
 }
