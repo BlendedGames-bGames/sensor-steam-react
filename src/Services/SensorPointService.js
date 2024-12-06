@@ -12,7 +12,7 @@ class SensorPointService {
   }
 
   async getHoursPlayed() {
-    const user = this.userService.getAllUsers();
+    const user = await this.userService.getAllUsers();
     const apiKey = user[0].key_steam;
     const steamId = user[0].id_user_steam;
     const apiUrl = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}&include_appinfo=true&include_played_free_games=true`;
@@ -47,7 +47,7 @@ class SensorPointService {
       const hoursPlayed = await this.getHoursPlayed();
 
       // Obtener el primer usuario de la base de datos
-      const users = this.userService.getAllUsers();
+      const users = await this.userService.getAllUsers();
       if (!users || users.length === 0) {
         console.error("No se encontró ningún usuario registrado.");
         return;
@@ -55,7 +55,7 @@ class SensorPointService {
       const user = users[0];
 
       // Obtener todos los puntos de sensor de la base de datos
-      const points = SensorPointRepository.getAllSensorPoints();
+      const points = await SensorPointRepository.getAllSensorPoints();
 
       // Definir un nuevo punto de sensor
       const newPoint = new SensorPointModel(
@@ -71,7 +71,7 @@ class SensorPointService {
       if (points.length === 0) {
         // Si no hay puntos de sensor registrados, crear el primero
         console.log("No se encontraron puntos de sensor, creando el primero...");
-        SensorPointRepository.createSensorPoint(newPoint);
+        await SensorPointRepository.createSensorPoint(newPoint);
       } else {
         // Comparar la fecha del último punto registrado
         const lastPoint = points[points.length - 1];
@@ -86,7 +86,7 @@ class SensorPointService {
             hoursPlayed);
           console.log("===Nuevo punto de sensor creado:", newPoint, "====");
 
-          SensorPointRepository.createSensorPoint(newPoint);
+          await SensorPointRepository.createSensorPoint(newPoint);
         } else {
           console.log("No se necesita crear un nuevo punto de sensor.");
         }
@@ -98,7 +98,7 @@ class SensorPointService {
 
   async getAllSensorPoints() {
     try {
-      const points = SensorPointRepository.getAllSensorPoints();
+      const points = await SensorPointRepository.getAllSensorPoints();
       console.log("Puntos de sensor obtenidos:", points);
       let pointsOutput = [points[points.length - 1].data_point];
       if (points.length >= 2) {
@@ -109,8 +109,7 @@ class SensorPointService {
       }
       return pointsOutput;
     } catch (error) {
-      console.error("Error al obtener los puntos de sensor:", error.message);
-      throw new Error("No se pudieron obtener los puntos de sensor.");
+      console.error("No se pudieron obtener los puntos del sensor", error.message);
     }
   }
 }

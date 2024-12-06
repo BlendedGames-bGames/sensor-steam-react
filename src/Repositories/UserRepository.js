@@ -1,19 +1,22 @@
-import UserModel from '../Models/UserModel.js'; // Importar la clase correctamente
-import Database from 'better-sqlite3'; // Usar import para módulos ESM
+import sqlite3 from 'sqlite3';
+import UserModel from '../Models/UserModel.js';
 
-const db = new Database('sensor-steam-db.db');
+// Inicializar conexión con la base de datos
+const db = new sqlite3.Database('./sensor-steam-db.db');
 
 // Crear la tabla si no existe
-db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id_players TEXT PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    password TEXT NOT NULL,
-    key_steam TEXT,
-    id_user_steam TEXT
-  )
-`);
+db.serialize(() => {
+  db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+      id_players TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT NOT NULL,
+      password TEXT NOT NULL,
+      key_steam TEXT,
+      id_user_steam TEXT
+    )
+  `);
+});
 
 class UserRepository {
   // Crear un usuario
@@ -22,79 +25,114 @@ class UserRepository {
       throw new Error('El usuario debe ser una instancia de UserModel');
     }
 
-    const stmt = db.prepare(`
+    const query = `
       INSERT INTO users (id_players, name, email, password, key_steam, id_user_steam)
       VALUES (?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(
-      user.id_players,
-      user.name,
-      user.email,
-      user.password,
-      user.key_steam,
-      user.id_user_steam
-    );
+    `;
+
+    return new Promise((resolve, reject) => {
+      db.run(
+        query,
+        [user.id_players, user.name, user.email, user.password, user.key_steam, user.id_user_steam],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(this.lastID); // Retorna el ID del último usuario insertado
+          }
+        }
+      );
+    });
   }
 
   // Obtener todos los usuarios
   static getUsers() {
-    const stmt = db.prepare('SELECT * FROM users');
-    const rows = stmt.all();
+    const query = 'SELECT * FROM users';
 
-    // Mapear filas a instancias de UserModel
-    return rows.map(
-      (row) =>
-        new UserModel(
-          row.id_players,
-          row.name,
-          row.email,
-          row.password,
-          row.key_steam,
-          row.id_user_steam
-        )
-    );
+    return new Promise((resolve, reject) => {
+      db.all(query, [], (err, rows) => {
+        if (err) {
+          reject(err);
+        } else {
+          // Mapear filas a instancias de UserModel
+          const users = rows.map(
+            (row) =>
+              new UserModel(
+                row.id_players,
+                row.name,
+                row.email,
+                row.password,
+                row.key_steam,
+                row.id_user_steam
+              )
+          );
+          resolve(users);
+        }
+      });
+    });
   }
 
   // Buscar un usuario por ID
   static findUserById(id_players) {
-    const stmt = db.prepare('SELECT * FROM users WHERE id_players = ?');
-    const row = stmt.get(id_players);
+    const query = 'SELECT * FROM users WHERE id_players = ?';
 
-    // Retornar null si el usuario no existe
-    if (!row) {
-      return null;
-    }
-
-    // Retornar una instancia de UserModel
-    return new UserModel(
-      row.id_players,
-      row.name,
-      row.email,
-      row.password,
-      row.key_steam,
-      row.id_user_steam
-    );
+    return new Promise((resolve, reject) => {
+      db.get(query, [id_players], (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          if (!row) {
+            resolve(null);
+          } else {
+            // Retornar una instancia de UserModel
+            const user = new UserModel(
+              row.id_players,
+              row.name,
+              row.email,
+              row.password,
+              row.key_steam,
+              row.id_user_steam
+            );
+            resolve(user);
+          }
+        }
+      });
+    });
   }
 
+  // Actualizar un usuario
   static updateUser(user) {
     if (!(user instanceof UserModel)) {
       throw new Error('El usuario debe ser una instancia de UserModel');
     }
 
-    const stmt = db.prepare(`
+    const query = `
       UPDATE users
       SET name = ?, email = ?, password = ?, key_steam = ?, id_user_steam = ?
       WHERE id_players = ?
-    `);
-    stmt.run(
-      user.name,
-      user.email,
-      user.password,
-      user.key_steam,
-      user.id_user_steam,
-      user.id_players
-    );
+    `;
+
+    return new Promise((resolve, reject) => {
+      db.run(
+        query,
+        [
+          user.name,
+          user.email,
+          user.password,
+          user.key_steam,
+          user.id_user_steam,
+          user.id_players,
+        ],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(true);
+          }
+        }
+      );
+    });
   }
 }
 
-export default UserRepository; // Exportar la clase como default
+export default UserRepository;

@@ -33,7 +33,7 @@ class UserController {
 
   async getAllUsers(req, res) {
     try {
-      const users = this.userService.getAllUsers();
+      const users = await this.userService.getAllUsers();
 
       if (users.length) {
         res.status(201).json(users);
@@ -46,9 +46,9 @@ class UserController {
     }
   }
 
-  userCheckDB(req, res) {
+  async userCheckDB(req, res) {
     try {
-      const users = this.userService.getAllUsers(); // Llama al servicio para obtener todos los usuarios
+      const users = await this.userService.getAllUsers(); // Llama al servicio para obtener todos los usuarios
       if (users.length > 0) {
         return res.status(200).json({ message: 'Ya existe un usuario.' });
       }
@@ -59,9 +59,9 @@ class UserController {
     }
   }
 
-  userCheckSteam(req, res) {
+  async userCheckSteam(req, res) {
     try {
-      const users = this.userService.getAllUsers();
+      const users = await this.userService.getAllUsers();
       // Validar si no hay usuarios
       if (!users || users.length === 0) {
         return res.status(404).json({ error: 'No hay usuarios en la base de datos.' });

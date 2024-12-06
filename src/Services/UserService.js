@@ -35,7 +35,8 @@ class UserService {
           );
 
           // Guardar el usuario en el repositorio
-          UserRepository.createUser(user);
+          await UserRepository.createUser(user);
+          console.log('Usuario guardado en la base de datos');
           return 1; // Usuario encontrado y guardado
         } else {
           return 0; // Usuario no encontrado o contraseña incorrecta
@@ -49,9 +50,9 @@ class UserService {
     }
   }
 
-  getAllUsers() {
+  async getAllUsers() {
     try {
-      const users = UserRepository.getUsers(); // Llamar al método estático del repositorio
+      const users = await UserRepository.getUsers(); // Llamar al método estático del repositorio
       return users; // Retornar la lista de usuarios
     } catch (error) {
       console.error('Error al obtener usuarios:', error.message);
@@ -66,7 +67,7 @@ class UserService {
       const response = await this.httpClient.get(apiUrl);
   
       if (response.status === 200) {
-        const users = UserRepository.getUsers();
+        const users = await UserRepository.getUsers();
         const user = users[0];
   
         if (!user) {
@@ -76,7 +77,7 @@ class UserService {
         user.key_steam = key_steam;
         user.id_user_steam = id_user_steam;
   
-        UserRepository.updateUser(user);
+        await UserRepository.updateUser(user);
   
         console.log('Credenciales de Steam actualizadas');
         return true; // Devuelve éxito

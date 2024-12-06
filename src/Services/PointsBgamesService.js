@@ -10,7 +10,8 @@ class PointsBgamesService {
     }
 
     async savePointsBgames() {
-        const user = this.userService.getAllUsers();
+        const user = await this.userService.getAllUsers();
+        console.log('Usuario:', user);
         const apiUrl = `http://localhost:3001/player_all_attributes/${user[0].id_players}`;
       
         try {
