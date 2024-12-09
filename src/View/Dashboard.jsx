@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/Dashboard.css";
+import RedditView from "./RedditView.jsx";
+import OverflowView from "./OverflowView.jsx";
+import Sidebar from "../Components/Sidebar.jsx";
 
 function Dashboard() {
   const [points, setPoints] = useState({
@@ -10,6 +13,7 @@ function Dashboard() {
     cognitivo: 0,
     linguistico: 0,
   });
+  const [currentView, setCurrentView] = useState("default");
   const [yesterdayPoints, setYesterdayPoints] = useState(0);
   const [todayPoints, setTodayPoints] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
@@ -102,37 +106,38 @@ function Dashboard() {
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <div className="sidebar">
-        <div className="logo">
-          <img src="src/assets/bgames_icon.png" alt="Logo" />
-        </div>
-        <button className="button">Sensor Data</button>
-      </div>
-
+      <Sidebar setCurrentView={setCurrentView} />
+      
       {/* Main Content */}
       <div className="main-content">
-        <div className="header">
-          <div className="points-box">Yesterday's points: <span>{yesterdayPoints}</span></div>
-          <div className="points-box">Today's points: <span>{todayPoints}</span></div>
-          <div className="profile">
-            <span>{user.name}</span>
-            <div className="avatar">
-              <img src="" />
+        {/* Renderizado dinámico basado en `currentView` */}
+        {currentView === "reddit" && <RedditView />}
+        {currentView === "overflow" && <OverflowView />}
+        {currentView === "default" && (
+          <>
+            <div className="header">
+              <div className="points-box">Yesterday's points: <span>{yesterdayPoints}</span></div>
+              <div className="points-box">Today's points: <span>{todayPoints}</span></div>
+              <div className="profile">
+                <span>{user.name}</span>
+                <div className="avatar">
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="points-section">
-          <h2>Your Points:</h2>
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
-          <div className="points-grid">
-            <div className="point-item">Social: <span>{points.social}</span></div>
-            <div className="point-item">Fisica: <span>{points.fisica}</span></div>
-            <div className="point-item">Afectivo: <span>{points.afectivo}</span></div>
-            <div className="point-item">Cognitivo: <span>{points.cognitivo}</span></div>
-            <div className="point-item">Linguistico: <span>{points.linguistico}</span></div>
-          </div>
-        </div>
+            <div className="points-section">
+              <h2>Your Points:</h2>
+              {errorMessage && <p className="error-message">{errorMessage}</p>}
+              <div className="points-grid">
+                <div className="point-item">Social: <span>{points.social}</span></div>
+                <div className="point-item">Fisica: <span>{points.fisica}</span></div>
+                <div className="point-item">Afectivo: <span>{points.afectivo}</span></div>
+                <div className="point-item">Cognitivo: <span>{points.cognitivo}</span></div>
+                <div className="point-item">Linguistico: <span>{points.linguistico}</span></div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

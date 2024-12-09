@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import '../styles/RedditView.css';
 
-function RedditLogin() { // Recibe setView como prop
+function RedditView() { // Recibe setView como prop
   const [idReddit, setReddit] = useState('');
   const [message, setMessage] = useState('');
 
@@ -22,23 +23,22 @@ function RedditLogin() { // Recibe setView como prop
     }
   };
   return (
-    <div>
-      <h1>Usuario Reddit</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
+    <div className="login-container">
+      <div className="login-form">
+        <h3>Connect to Reddit</h3>
+        <form onSubmit={handleSubmit}>
           <input
-            type="idReddit"
+            type="text"
+            placeholder="ID Reddit"
             value={idReddit}
             onChange={(e) => setReddit(e.target.value)}
-            required
           />
-        </div>
-        <button type="submit">Verificar Usuario</button>
-      </form>
-      {message && <p>{message}</p>}
+          <button type="submit">Send</button>
+        </form>
+        <p>{message}</p>
+      </div>
     </div>
   );
 }
 
-export default RedditLogin;
+export default RedditView;
