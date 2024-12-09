@@ -2,11 +2,14 @@ import express from 'express';
 import UserController from '../Controllers/UserController.js';
 import PointsBgamesController from '../Controllers/PointsBgamesController.js';
 import SensorPointController from '../Controllers/SensorPointController.js';
-
+import SensorStackOverflowController from '../Controllers/SensorStackOverflowController.js';
+import SensorRedditController from '../Controllers/SensorRedditController.js';
 const router = express.Router();
 const userController = new UserController();
 const pointsBgamesController = new PointsBgamesController();
 const sensorPointController = new SensorPointController();
+const sensorStackOverflowController = new SensorStackOverflowController();
+const sensorRedditController = new SensorRedditController();
 
 // Ruta para crear un usuario
 router.post('/create', (req, res) => userController.createUser(req, res));
@@ -18,6 +21,7 @@ router.get('/points', (req, res) => pointsBgamesController.savePointsBgames(req,
 router.get('/hoursSteam', (req, res) => sensorPointController.getHoursPlayed(req, res));
 router.get('/savePoint', (req, res) => sensorPointController.saveSensorPoint(req, res));
 router.get('/allPoints', (req, res) => sensorPointController.getAllSensorPoints(req, res));
-
+router.get('/stack', (req, res) => sensorStackOverflowController.getReputation(req, res));
+router.get('/reddit', (req, res) => sensorRedditController.getKarma(req, res));
 // Exporta el router como default
 export default router;
