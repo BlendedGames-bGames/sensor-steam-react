@@ -5,8 +5,9 @@ class SensorStackOverflowService {
     this.httpClient = axios.create();
   }
 
-  async getStackOverflowReputation() {
-    const id_stackO = 90525;
+  async getStackOverflowReputation(id_stackO) {
+    //const id_stackO = 90525;
+    console.log("ID de usuario en StackOverflow:", id_stackO);
     const apiUrl = `https://api.stackexchange.com/2.3/users/${id_stackO}?site=es.stackoverflow`;
     try {
       const response = await this.httpClient.get(apiUrl);

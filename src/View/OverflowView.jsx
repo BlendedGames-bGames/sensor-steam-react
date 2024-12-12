@@ -10,8 +10,8 @@ function OverflowView() { // Recibe setView como prop
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8080/users/Overflow', {
-        idOverflow,
+      const response = await axios.post('http://localhost:8080/users/stack', {
+        id_stackoverflow: idOverflow,
       });
       if (response.status === 200) {
         setMessage('Usuario creado exitosamente.');

@@ -31,8 +31,13 @@ class SensorRedditService {
     }
   }
 
-  async saveSensorPoint() {
-  }
+  async checkUserReddit() {}
+
+  async createRedditUser() { }
+
+  async createPoints() { }
+
+  async getPoints() { }
 }
 
 export default SensorRedditService;

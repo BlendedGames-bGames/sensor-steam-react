@@ -21,7 +21,8 @@ router.get('/points', (req, res) => pointsBgamesController.savePointsBgames(req,
 router.get('/hoursSteam', (req, res) => sensorPointController.getHoursPlayed(req, res));
 router.get('/savePoint', (req, res) => sensorPointController.saveSensorPoint(req, res));
 router.get('/allPoints', (req, res) => sensorPointController.getAllSensorPoints(req, res));
-router.get('/stack', (req, res) => sensorStackOverflowController.getReputation(req, res));
+router.post('/stack', (req, res) => sensorStackOverflowController.getReputation(req, res));
 router.get('/reddit', (req, res) => sensorRedditController.getKarma(req, res));
+router.get('/callback',(req, res) => sensorRedditController.checkUserReddit(req, res));
 // Exporta el router como default
 export default router;

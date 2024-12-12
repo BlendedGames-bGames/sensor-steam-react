@@ -7,8 +7,10 @@ class SensorStackOverflowController {
   }
 
   async getReputation(req, res) {
+    const { id_stackoverflow } = req.body;
+    console.log('id_stackoverflow:', id_stackoverflow);
     try {
-      const reputation = await this.sensorStackOverflowService.getStackOverflowReputation();
+      const reputation = await this.sensorStackOverflowService.getStackOverflowReputation(id_stackoverflow);
       return res.status(200).json({ reputation });
     } catch (error) {
       console.error('Error interno del servidor:', error.message);
