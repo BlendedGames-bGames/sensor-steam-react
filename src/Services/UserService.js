@@ -31,7 +31,8 @@ class UserService {
             userFromApi.email,
             userFromApi.password,
             userFromApi.key_steam || null, // Opcional
-            userFromApi.id_user_steam || null // Opcional
+            userFromApi.id_user_steam || null, // Opcional
+            userFromApi.id_reddit || null // Opcional
           );
 
           // Guardar el usuario en el repositorio
@@ -76,6 +77,8 @@ class UserService {
   
         user.key_steam = key_steam;
         user.id_user_steam = id_user_steam;
+
+        console.log(user);
   
         await UserRepository.updateUser(user);
   

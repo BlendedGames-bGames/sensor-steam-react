@@ -1,7 +1,10 @@
 import axios from "axios";
+import UserModel from '../Models/UserModel.js'; // Modelo del usuario
+import UserRepository from '../Repositories/UserRepository.js'; // Repositorio del usuario
 
 class SensorRedditService {
-  constructor() {
+  constructor(userRepository) {
+    this.userRepository = userRepository;
     this.httpClient = axios.create();
   }
 
@@ -31,9 +34,37 @@ class SensorRedditService {
     }
   }
 
-  async checkUserReddit() {}
+  async createRedditUser(id_reddit) {
+    try {
+      const users = await UserRepository.getUsers();
+      const user = users[0];
+      console.log("hola",user);
+      if (!user) {
+        throw new Error('No se encontró el usuario en la base de datos.');
+      }
+      user.id_reddit = id_reddit;
+      console.log(user);
 
-  async createRedditUser() { }
+      await UserRepository.updateUserSteam(user);
+
+      console.log('Creación de usuario de Reddit exitosa.');
+
+    } catch (error) {
+      console.error('Error al obtener los datos del usuario:', error.message);
+      throw new Error('Error al actualizar los datos de Steam para el usuario.');
+    }
+  }
+
+  async checkUserRedditDB(){
+    const users = await UserRepository.getUsers();
+    const user = users[0];                            
+    if (user.id_reddit) {
+      console.log('El usuario tiene cuenta de Reddit');
+      return 1;
+    }
+    console.log('El usuario no tiene cuenta de Reddit');
+    return 0;
+  }
 
   async createPoints() { }
 

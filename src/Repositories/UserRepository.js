@@ -13,7 +13,8 @@ db.serialize(() => {
       email TEXT NOT NULL,
       password TEXT NOT NULL,
       key_steam TEXT,
-      id_user_steam TEXT
+      id_user_steam TEXT,
+      id_reddit TEXT
     )
   `);
 });
@@ -26,14 +27,14 @@ class UserRepository {
     }
 
     const query = `
-      INSERT INTO users (id_players, name, email, password, key_steam, id_user_steam)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO users (id_players, name, email, password, key_steam, id_user_steam, id_reddit)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
 
     return new Promise((resolve, reject) => {
       db.run(
         query,
-        [user.id_players, user.name, user.email, user.password, user.key_steam, user.id_user_steam],
+        [user.id_players, user.name, user.email, user.password, user.key_steam, user.id_user_steam, user.id_reddit],
         function (err) {
           if (err) {
             reject(err);
@@ -63,7 +64,8 @@ class UserRepository {
                 row.email,
                 row.password,
                 row.key_steam,
-                row.id_user_steam
+                row.id_user_steam,
+                row.id_reddit
               )
           );
           resolve(users);
@@ -91,7 +93,8 @@ class UserRepository {
               row.email,
               row.password,
               row.key_steam,
-              row.id_user_steam
+              row.id_user_steam,
+              row.id_reddit
             );
             resolve(user);
           }
@@ -108,7 +111,7 @@ class UserRepository {
 
     const query = `
       UPDATE users
-      SET name = ?, email = ?, password = ?, key_steam = ?, id_user_steam = ?
+      SET name = ?, email = ?, password = ?, key_steam = ?, id_user_steam = ?, id_reddit = ?
       WHERE id_players = ?
     `;
 
@@ -121,7 +124,43 @@ class UserRepository {
           user.password,
           user.key_steam,
           user.id_user_steam,
+          user.id_reddit,
           user.id_players,
+        ],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(true);
+          }
+        }
+      );
+    });
+  }
+
+  // Actualizar un usuario
+  static updateUserReddit(user) {
+    if (!(user instanceof UserModel)) {
+      throw new Error('El usuario debe ser una instancia de UserModel');
+    }
+  
+    const query = `
+      UPDATE users
+      SET name = ?, email = ?, password = ?, key_steam = ?, id_user_steam = ?, id_reddit = ?
+      WHERE id_players = ?
+    `;
+  
+    return new Promise((resolve, reject) => {
+      db.run(
+        query,
+        [
+          user.name,
+          user.email,
+          user.password,
+          user.key_steam,
+          user.id_user_steam,
+          user.id_reddit, // Aquí estaba mal el orden
+          user.id_players, // Este debe ser el último porque corresponde al WHERE
         ],
         function (err) {
           if (err) {

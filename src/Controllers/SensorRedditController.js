@@ -1,9 +1,11 @@
 import axios from "axios";
 import SensorRedditService from "../Services/SensorRedditService.js";
+import UserRepository from '../Repositories/UserRepository.js';
 
 class SensorRedditController {
     constructor() {
-        this.sensorRedditService = new SensorRedditService;
+        const userRepository = new UserRepository();
+        this.sensorRedditService = new SensorRedditService(userRepository);
     }
 
     async getKarma(req, res) {
@@ -53,19 +55,22 @@ class SensorRedditController {
             console.log('Access token:', accessToken);
             axios.get('https://oauth.reddit.com/api/v1/me', {
                 headers: {
-                  'Authorization': `Bearer ${accessToken}`, // Encabezado con el token
-                  'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${accessToken}`, // Encabezado con el token
+                    'Content-Type': 'application/json'
                 }
-              })
+            })
                 .then(response => {
-                  console.log('Karma total:', response.data.total_karma); // Muestra la información del usuario
+                    console.log('Nombre de usuario:', response.data.name); // Muestra el nombre de usuario
+                    console.log('Karma total:', response.data.total_karma); // Muestra la información del usuario
+                    this.sensorRedditService.createRedditUser(response.data.name);
+                    return res.status(200).json({ message: 'Usuario creado exitosamente.' });
                 })
                 .catch(error => {
-                  if (error.response) {
-                    console.error('Error en la respuesta:', error.response.status, error.response.data);
-                  } else {
-                    console.error('Error en la solicitud:', error.message);
-                  }
+                    if (error.response) {
+                        console.error('Error en la respuesta:', error.response.status, error.response.data);
+                    } else {
+                        console.error('Error en la solicitud:', error.message);
+                    }
                 });
 
         } catch (error) {
@@ -73,6 +78,22 @@ class SensorRedditController {
             res.status(500).send("Error exchanging authorization code");
         }
     }
+    async checkUserRedditDB(req, res) {
+        try {
+          const userReddit = await this.sensorRedditService.checkUserRedditDB();
+          if (userReddit) {
+            // Usuario encontrado
+            return res.status(200).json({ userCreated: true, message: 'Usuario creado' });
+          } else {
+            // Usuario no encontrado
+            return res.status(200).json({ userCreated: false, message: 'Usuario no creado aún' });
+          }
+        } catch (error) {
+          console.error('Error interno del servidor:', error.message);
+          return res.status(500).json({ error: 'Error interno del servidor.' });
+        }
+      }
+      
 }
 
 export default SensorRedditController;
