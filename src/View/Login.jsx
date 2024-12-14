@@ -16,7 +16,7 @@ function Login({ setView }) { // Recibe setView como prop
       });
       if (response.status === 201) {
         setMessage('Usuario creado exitosamente.');
-        setView('steam-login'); // Redirige a SteamLogin
+        setView('dashboard'); // Redirige a SteamLogin
       } else {
         setMessage('Error al crear el usuario.');
       }

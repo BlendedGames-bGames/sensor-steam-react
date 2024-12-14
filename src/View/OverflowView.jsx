@@ -25,7 +25,7 @@ function OverflowView() { // Recibe setView como prop
   return (
     <div className="login-container">
       <div className="login-form">
-        <h3>Connect to StackOverflow.es</h3>
+        <h1>Connect to StackOverflow.es</h1>
         <form onSubmit={handleSubmit}>
           <input
             type="text"

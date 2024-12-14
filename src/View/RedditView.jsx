@@ -71,7 +71,7 @@ function RedditView() { // Recibe setView como prop
   return (
     <div className="login-container">
       <div className="login-form">
-        <h3>Connect to Reddit</h3>
+        <h1>Connect to Reddit</h1>
         <p>{message}</p>
         <button type="submit" onClick={handleLogin} >Login whith Reddit</button>
       </div>

@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/Dashboard.css";
+import "../styles/ButtonBackDashView.css";
 import RedditView from "./RedditView.jsx";
 import OverflowView from "./OverflowView.jsx";
+import SteamLogin from "./SteamLogin.jsx";
 import Sidebar from "../Components/Sidebar.jsx";
+
 
 function Dashboard() {
   const [points, setPoints] = useState({
@@ -14,34 +17,25 @@ function Dashboard() {
     linguistico: 0,
   });
   const [currentView, setCurrentView] = useState("default");
+  const [previousView, setPreviousView] = useState(null);
   const [yesterdayPoints, setYesterdayPoints] = useState(0);
   const [todayPoints, setTodayPoints] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
-  const [user, setUser] = useState({ name: "", });
+  const [user, setUser] = useState({ name: "" });
 
   useEffect(() => {
     const fetchSensorPoints = async () => {
       try {
         const response = await axios.get("http://localhost:8080/users/allPoints");
 
-        if (response.status === 201 && response.data.response.length > 0) { // Correguir esto, es 200 el status
-          const sensorPoints = response.data.response; // Acceder al arreglo "response"
-          // Validar que hay al menos un elemento en el arreglo
-          if (sensorPoints.length == 1) {
-            // Asignar puntos de hoy y ayer en base a la posición en el arreglo
-            const today = parseFloat(sensorPoints[0] || 0); // Segundo elemento
-            const yesterday = parseFloat(sensorPoints[1] || 0); // Primer elemento, si existe
+        if (response.status === 201 && response.data.response.length > 0) {
+          const sensorPoints = response.data.response;
 
-            setTodayPoints(today);
-            setYesterdayPoints(yesterday);
-          } else {
-            // Asignar puntos de hoy y ayer en base a la posición en el arreglo
-            const today = parseFloat(sensorPoints[1] || 0); // Segundo elemento
-            const yesterday = parseFloat(sensorPoints[0] || 0); // Primer elemento, si existe
+          const today = parseFloat(sensorPoints[0] || 0); // Segundo elemento
+          const yesterday = parseFloat(sensorPoints[1] || 0); // Primer elemento, si existe
 
-            setTodayPoints(today);
-            setYesterdayPoints(yesterday);
-          }
+          setTodayPoints(today);
+          setYesterdayPoints(yesterday);
         } else {
           setErrorMessage("No se pudieron obtener los puntos de sensor.");
         }
@@ -69,7 +63,6 @@ function Dashboard() {
           setErrorMessage("No se pudieron obtener los puntos.");
         }
       } catch (error) {
-        console.error("Error al obtener puntos:", error.message);
         setErrorMessage("Error al comunicarse con el servidor.");
       }
     };
@@ -81,12 +74,8 @@ function Dashboard() {
         if (response.status === 201) {
           const user = response.data[0];
 
-          // Validar si el usuario existe
           if (user) {
-            const mappedUser = {
-              name: user.name,
-            };
-            setUser(mappedUser); // Actualizar estado del usuario
+            setUser({ name: user.name });
           } else {
             setErrorMessage("No se encontró ningún usuario.");
           }
@@ -94,25 +83,48 @@ function Dashboard() {
           setErrorMessage("No se pudo obtener el usuario.");
         }
       } catch (error) {
-        console.error("Error al obtener usuario:", error.message);
         setErrorMessage("Error al comunicarse con el servidor para obtener usuario.");
       }
     };
+
     fetchSensorPoints();
     fetchPoints();
     fetchUser();
   }, []);
 
+  const handleSetView = (view) => {
+    setCurrentView(view); // Cambia a la nueva vista
+  };
+
+  const handleGoBack = () => {
+    setCurrentView("default"); // Siempre regresa al dashboard
+  };
+
   return (
     <div className="dashboard-container">
       {/* Sidebar */}
-      <Sidebar setCurrentView={setCurrentView} />
-      
+      <Sidebar setCurrentView={handleSetView} />
+
       {/* Main Content */}
       <div className="main-content">
-        {/* Renderizado dinámico basado en `currentView` */}
-        {currentView === "reddit" && <RedditView />}
-        {currentView === "overflow" && <OverflowView />}
+        {currentView === "reddit" && (
+          <>
+            <button onClick={handleGoBack} className="back-button">Back</button>
+            <RedditView />
+          </>
+        )}
+        {currentView === "overflow" && (
+          <>
+            <button onClick={handleGoBack} className="back-button">Back</button>
+            <OverflowView />
+          </>
+        )}
+        {currentView === "steam" && (
+          <>
+            <button onClick={handleGoBack} className="back-button">Back</button>
+            <SteamLogin />
+          </>
+        )}
         {currentView === "default" && (
           <>
             <div className="header">
@@ -120,8 +132,7 @@ function Dashboard() {
               <div className="points-box">Today's points: <span>{todayPoints}</span></div>
               <div className="profile">
                 <span>{user.name}</span>
-                <div className="avatar">
-                </div>
+                <div className="avatar"></div>
               </div>
             </div>
 
@@ -144,5 +155,6 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
 
 

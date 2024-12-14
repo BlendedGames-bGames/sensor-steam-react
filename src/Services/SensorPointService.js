@@ -64,7 +64,11 @@ class SensorPointService {
         user.id_players,
         10,
         new Date().toLocaleDateString(),
-        hoursPlayed);
+        hoursPlayed,
+        null,
+        null,
+        "Steam"
+      );
       console.log("===Nuevo punto de sensor creado:", newPoint, "====");
 
       // Lógica para verificar y crear puntos de sensor
@@ -83,7 +87,10 @@ class SensorPointService {
             user.id_players,
             10,
             new Date().toLocaleDateString(),
-            hoursPlayed);
+            hoursPlayed + 999,
+            null,
+            null,
+            "Steam");
           console.log("===Nuevo punto de sensor creado:", newPoint, "====");
 
           await SensorPointRepository.createSensorPoint(newPoint);

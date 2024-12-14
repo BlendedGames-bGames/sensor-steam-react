@@ -13,7 +13,12 @@ db.serialize(() => {
             id_players TEXT NOT NULL,
             data_point TEXT NOT NULL,
             date_time TEXT NOT NULL,
-            hours_played TEXT NOT NULL
+            hours_played TEXT,
+            karma_player TEXT,
+            reputation_player TEXT,
+            tipe_sensor TEXT NOT NULL
+
+
         )
     `);
 });
@@ -28,8 +33,8 @@ class SensorPointRepository {
         }
 
         const query = `
-            INSERT INTO sensor_points (id_sensor, id_players, data_point, date_time, hours_played)
-            VALUES (?, ?, ?, ?, ?)
+            INSERT INTO sensor_points (id_sensor, id_players, data_point, date_time, hours_played, karma_player, reputation_player, tipe_sensor)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         return new Promise((resolve, reject) => {
@@ -41,6 +46,9 @@ class SensorPointRepository {
                     sensorPoint.data_point,
                     sensorPoint.date_time,
                     sensorPoint.hours_played,
+                    sensorPoint.karma_player,
+                    sensorPoint.reputation_player,
+                    sensorPoint.tipe_sensor,
                 ],
                 function (err) {
                     if (err) {
@@ -71,7 +79,10 @@ class SensorPointRepository {
                                 row.id_players,
                                 row.data_point,
                                 row.date_time,
-                                row.hours_played
+                                row.hours_played,
+                                row.karma_player,
+                                row.reputation_player,
+                                row.tipe_sensor,
                             )
                     );
                     resolve(sensorPoints);

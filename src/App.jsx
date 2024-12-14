@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Login from './View/Login';
-import SteamLogin from './View/SteamLogin';
 import Dashboard from './View/Dashboard';
 
 function App() {
@@ -21,7 +20,7 @@ function App() {
             }
           } catch (error) {
             if (error.response?.status === 404) {
-              setView('steam-login'); // Hay usuarios pero no tienen Steam key
+              setView('dashboard'); // Hay usuarios pero no tienen Steam key
             } else {
               console.error('Error en metodo Steam Check', error.message);
             }
@@ -50,7 +49,6 @@ function App() {
     <div>
       
       {view === 'login' && <Login setView={setView} />}
-      {view === 'steam-login' && <SteamLogin setView={setView}/>}
       {view === 'dashboard' && <Dashboard />}
     </div>
   );
