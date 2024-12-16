@@ -62,11 +62,12 @@ class SensorPointRepository {
     }
 
     // Obtener todos los puntos de sensor
-    static getAllSensorPoints() {
-        const query = 'SELECT * FROM sensor_points';
+    // Obtener todos los puntos de sensor filtrados por tipe_sensor
+    static getAllSensorPoints(tipe_sensor) {
+        const query = 'SELECT * FROM sensor_points WHERE tipe_sensor = ?';
 
         return new Promise((resolve, reject) => {
-            db.all(query, [], (err, rows) => {
+            db.all(query, [tipe_sensor], (err, rows) => { // Pasar el parámetro en el array
                 if (err) {
                     reject(err);
                 } else {
@@ -82,7 +83,7 @@ class SensorPointRepository {
                                 row.hours_played,
                                 row.karma_player,
                                 row.reputation_player,
-                                row.tipe_sensor,
+                                row.tipe_sensor
                             )
                     );
                     resolve(sensorPoints);

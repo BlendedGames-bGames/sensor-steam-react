@@ -13,14 +13,14 @@ function SteamLogin() {
   useEffect(() => {
     const fetchSensorPoints = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/users/allPoints");
+        const response = await axios.post('http://localhost:8080/users/allPoints', {
+          tipe_sensor: "Steam",
+        });
 
-        if (response.status === 201 && response.data.response.length > 0) {
-          const sensorPoints = response.data.response;
-
-          const today = parseFloat(sensorPoints[0] || 0); // Segundo elemento
-          const yesterday = parseFloat(sensorPoints[1] || 0); // Primer elemento, si existe
-
+        if (response.status === 200 && response.data.data.length > 0) {
+          const sensorPoints = response.data.data;
+          const today = parseFloat(sensorPoints[0] || 0);
+          const yesterday = parseFloat(sensorPoints[1] || 0);
           setTodayPoints(today);
           setYesterdayPoints(yesterday);
         } else {

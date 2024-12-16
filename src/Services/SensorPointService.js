@@ -55,7 +55,7 @@ class SensorPointService {
       const user = users[0];
 
       // Obtener todos los puntos de sensor de la base de datos
-      const points = await SensorPointRepository.getAllSensorPoints();
+      const points = await SensorPointRepository.getAllSensorPoints('Steam');
 
       // Definir un nuevo punto de sensor
       const newPoint = new SensorPointModel(
@@ -81,19 +81,8 @@ class SensorPointService {
         const lastPoint = points[points.length - 1];
         if (lastPoint.date_time < new Date().toLocaleDateString()) { // Si el último punto es de una fecha anterior a la actual se crea un nuevo punto
           console.log("El último punto es de una fecha anterior, creando un nuevo punto...");
-          const newPoint = new SensorPointModel(
-            null,
-            1,
-            user.id_players,
-            10,
-            new Date().toLocaleDateString(),
-            hoursPlayed + 999,
-            null,
-            null,
-            "Steam");
-          console.log("===Nuevo punto de sensor creado:", newPoint, "====");
-
           await SensorPointRepository.createSensorPoint(newPoint);
+          console.log("===Nuevo punto de sensor creado:", newPoint, "====");
         } else {
           console.log("No se necesita crear un nuevo punto de sensor.");
         }
@@ -103,9 +92,10 @@ class SensorPointService {
     }
   }
 
-  async getAllSensorPoints() {
+  
+  async getAllSensorPoints(tipe_sensor) {
     try {
-      const points = await SensorPointRepository.getAllSensorPoints();
+      const points = await SensorPointRepository.getAllSensorPoints(tipe_sensor);
       console.log("Puntos de sensor obtenidos:", points);
       let pointsOutput = [points[points.length - 1].data_point];
       if (points.length >= 2) {
@@ -117,6 +107,71 @@ class SensorPointService {
       return pointsOutput;
     } catch (error) {
       console.error("No se pudieron obtener los puntos del sensor", error.message);
+    }
+  }
+  
+
+  /*
+  async getAllSensorPoints(tipe_sensor) {
+
+    try {
+      const points = await SensorPointRepository.getAllSensorPoints(tipe_sensor);
+      return points;
+    } catch (error) {
+      console.error("No se pudieron obtener los puntos del sensor", error.message);
+    }
+  }
+  */
+
+  async saveSensorPointReddit() {
+    try {
+      // Obtener usuarios y verificar existencia
+      const users = await this.userService.getAllUsers();
+      if (!users || users.length === 0) {
+        console.error("No se encontró ningún usuario registrado.");
+        return;
+      }
+  
+      // Obtener karma de Reddit
+      const user = users[0];
+      const karma = await this.sensorRedditService.getRedditKarma(user.id_reddit);
+
+      console.log("Karma de Reddit:", karma);
+  
+      // Verificar y obtener puntos de sensor existentes
+      const points = await SensorPointRepository.getAllSensorPoints();
+  
+      const newPoint = new SensorPointModel(
+        null, // id (se generará automáticamente)
+        1, // sensor_id
+        user.id_players, // usuario
+        10, // valor predefinido
+        new Date().toLocaleDateString(), // fecha actual
+        null, // valor adicional
+        karma, // valor obtenido del karma
+        null, // campo adicional
+        "Reddit" // tipo de sensor
+      );
+  
+      console.log("===Nuevo punto de sensor creado Reddit:", newPoint, "====");
+  
+      if (points.length === 0) {
+        console.log("No se encontraron puntos de sensor, creando el primero...");
+        await SensorPointRepository.createSensorPoint(newPoint);
+      } else {
+        // Obtener el último punto de sensor y compararlo con la fecha actual
+        const lastPoint = points[points.length - 1];
+        if (lastPoint.date_time < new Date().toLocaleDateString()) {
+          console.log("El último punto es de una fecha anterior, creando un nuevo punto...");
+          await SensorPointRepository.createSensorPoint(newPoint);
+          console.log("===Punto de sensor guardado exitosamente.===");
+        } else {
+          console.log("No se necesita crear un nuevo punto de sensor, fecha ya registrada.");
+        }
+      }
+    } catch (error) {
+      console.error("Error al guardar el punto de sensor de Reddit:", error.message);
+      throw new Error("Hubo un problema al procesar el punto de sensor.");
     }
   }
 }
