@@ -14,7 +14,9 @@ db.serialize(() => {
       password TEXT NOT NULL,
       key_steam TEXT,
       id_user_steam TEXT,
-      id_reddit TEXT
+      id_reddit TEXT,
+      id_player_stack TEXT,
+      name_stack TEXT
     )
   `);
 });
@@ -27,14 +29,14 @@ class UserRepository {
     }
 
     const query = `
-      INSERT INTO users (id_players, name, email, password, key_steam, id_user_steam, id_reddit)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (id_players, name, email, password, key_steam, id_user_steam, id_reddit, id_player_stack, name_stack)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     return new Promise((resolve, reject) => {
       db.run(
         query,
-        [user.id_players, user.name, user.email, user.password, user.key_steam, user.id_user_steam, user.id_reddit],
+        [user.id_players, user.name, user.email, user.password, user.key_steam, user.id_user_steam, user.id_reddit, user.id_player_stack, user.name_stack],
         function (err) {
           if (err) {
             reject(err);
@@ -65,7 +67,9 @@ class UserRepository {
                 row.password,
                 row.key_steam,
                 row.id_user_steam,
-                row.id_reddit
+                row.id_reddit,
+                row.id_player_stack,
+                row.name_stack
               )
           );
           resolve(users);
@@ -94,7 +98,9 @@ class UserRepository {
               row.password,
               row.key_steam,
               row.id_user_steam,
-              row.id_reddit
+              row.id_reddit,
+              row.id_player_stack,
+              row.name_stack
             );
             resolve(user);
           }
@@ -104,17 +110,62 @@ class UserRepository {
   }
 
   // Actualizar un usuario
-  static updateUser(user) {
+static updateUser(user) { // Se puede usar para todos
+  if (!(user instanceof UserModel)) {
+    throw new Error('El usuario debe ser una instancia de UserModel');
+  }
+
+  const query = `
+    UPDATE users
+    SET name = ?, 
+        email = ?, 
+        password = ?, 
+        key_steam = ?, 
+        id_user_steam = ?, 
+        id_reddit = ?, 
+        id_player_stack = ?, 
+        name_stack = ?
+    WHERE id_players = ?
+  `;
+
+  return new Promise((resolve, reject) => {
+    db.run(
+      query,
+      [
+        user.name,
+        user.email,
+        user.password,
+        user.key_steam,
+        user.id_user_steam,
+        user.id_reddit,
+        user.id_player_stack,  
+        user.name_stack,       
+        user.id_players        // Este es el último valor para el WHERE
+      ],
+      function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(true);
+        }
+      }
+    );
+  });
+}
+
+  /*
+  // Actualizar un usuario
+  static updateUserReddit(user) { 
     if (!(user instanceof UserModel)) {
       throw new Error('El usuario debe ser una instancia de UserModel');
     }
-
+  
     const query = `
       UPDATE users
       SET name = ?, email = ?, password = ?, key_steam = ?, id_user_steam = ?, id_reddit = ?
       WHERE id_players = ?
     `;
-
+  
     return new Promise((resolve, reject) => {
       db.run(
         query,
@@ -125,41 +176,6 @@ class UserRepository {
           user.key_steam,
           user.id_user_steam,
           user.id_reddit,
-          user.id_players,
-        ],
-        function (err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(true);
-          }
-        }
-      );
-    });
-  }
-
-  // Actualizar un usuario
-  static updateUserReddit(user) {
-    if (!(user instanceof UserModel)) {
-      throw new Error('El usuario debe ser una instancia de UserModel');
-    }
-  
-    const query = `
-      UPDATE users
-      SET name = ?, email = ?, password = ?, key_steam = ?, id_user_steam = ?, id_reddit = ?
-      WHERE id_players = ?
-    `;
-  
-    return new Promise((resolve, reject) => {
-      db.run(
-        query,
-        [
-          user.name,
-          user.email,
-          user.password,
-          user.key_steam,
-          user.id_user_steam,
-          user.id_reddit, // Aquí estaba mal el orden
           user.id_players, // Este debe ser el último porque corresponde al WHERE
         ],
         function (err) {
@@ -172,6 +188,7 @@ class UserRepository {
       );
     });
   }
+  */
 }
 
 export default UserRepository;

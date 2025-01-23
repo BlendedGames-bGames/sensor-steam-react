@@ -21,20 +21,9 @@ body {
 
 .header {
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
   align-items: center;
   margin-bottom: 40px;
-}
-
-.points-box {
-  background-color: #2C2C61;
-  padding: 15px 20px;
-  border-radius: 10px;
-  font-size: 16px;
-}
-
-.points-box span {
-  font-weight: bold;
 }
 
 .profile {

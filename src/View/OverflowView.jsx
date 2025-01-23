@@ -2,40 +2,28 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import '../styles/OverflowView.css';
 
-function OverflowView() { // Recibe setView como prop
-  const [idOverflow, setOverflow] = useState('');
+function OverflowView() {
   const [message, setMessage] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleLogin = (e) => {
     e.preventDefault();
+    console.log('Login Stack Overflow');
+    const clientId = '30672';  // Tu client_id registrado en Stack Overflow
+    const redirectUri = 'http://localhost:8080/users/callback-stack-overflow'; // URL exacta registrada en Stack Overflow
+    const scope = 'read_inbox,private_info';
+    const state = 'xyz123';  // Un valor aleatorio para prevención CSRF
 
-    try {
-      const response = await axios.post('http://localhost:8080/users/stack', {
-        id_stackoverflow: idOverflow,
-      });
-      if (response.status === 200) {
-        setMessage('Usuario creado exitosamente.');
-      } else {
-        setMessage('Error al crear el usuario.');
-      }
-    } catch (error) {
-      setMessage('Error del servidor: ' + error.response?.data?.error || error.message);
-    }
+    const authUrl = `https://stackoverflow.com/oauth?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${scope}&state=${state}`;
+
+    window.open(authUrl, '_blank');
   };
+
   return (
     <div className="login-container">
       <div className="login-form">
-        <h1>Connect to StackOverflow.es</h1>
-        <form onSubmit={handleSubmit}>
-          <input
-            type="text"
-            placeholder="ID StackOverflow"
-            value={idOverflow}
-            onChange={(e) => setOverflow(e.target.value)}
-          />
-          <button type="submit">Send</button>
-        </form>
+        <h1>Connect to Stack Overflow</h1>
         <p>{message}</p>
+        <button type="submit" onClick={handleLogin}>Login with Stack Overflow</button>
       </div>
     </div>
   );

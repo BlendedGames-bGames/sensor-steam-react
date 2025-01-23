@@ -25,5 +25,6 @@ router.post('/stack', (req, res) => sensorStackOverflowController.getReputation(
 router.get('/reddit', (req, res) => sensorRedditController.getKarma(req, res));
 router.get('/callback',(req, res) => sensorRedditController.checkUserReddit(req, res));
 router.get('/check-reddit-user',(req, res) => sensorRedditController.checkUserRedditDB(req, res));
+router.get('/callback-stack-overflow',(req, res) => sensorStackOverflowController.checkUserStackOverflow(req, res));
 // Exporta el router como default
 export default router;

@@ -17,33 +17,11 @@ function Dashboard() {
     linguistico: 0,
   });
   const [currentView, setCurrentView] = useState("default");
-  const [previousView, setPreviousView] = useState(null);
-  const [yesterdayPoints, setYesterdayPoints] = useState(0);
   const [todayPoints, setTodayPoints] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [user, setUser] = useState({ name: "" });
 
   useEffect(() => {
-    const fetchSensorPoints = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/users/allPoints");
-
-        if (response.status === 201 && response.data.response.length > 0) {
-          const sensorPoints = response.data.response;
-
-          const today = parseFloat(sensorPoints[0] || 0); // Segundo elemento
-          const yesterday = parseFloat(sensorPoints[1] || 0); // Primer elemento, si existe
-
-          setTodayPoints(today);
-          setYesterdayPoints(yesterday);
-        } else {
-          setErrorMessage("No se pudieron obtener los puntos de sensor.");
-        }
-      } catch (error) {
-        setErrorMessage("Error al comunicarse con el servidor para obtener puntos de sensor.");
-      }
-    };
-
     const fetchPoints = async () => {
       try {
         const response = await axios.get("http://localhost:8080/users/points");
@@ -87,7 +65,6 @@ function Dashboard() {
       }
     };
 
-    fetchSensorPoints();
     fetchPoints();
     fetchUser();
   }, []);
@@ -128,8 +105,6 @@ function Dashboard() {
         {currentView === "default" && (
           <>
             <div className="header">
-              <div className="points-box">Yesterday's points: <span>{yesterdayPoints}</span></div>
-              <div className="points-box">Today's points: <span>{todayPoints}</span></div>
               <div className="profile">
                 <span>{user.name}</span>
                 <div className="avatar"></div>
