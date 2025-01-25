@@ -12,7 +12,7 @@ class SensorRedditService {
     this.userService = new UserService(new UserRepository());
     this.httpClient = axios.create();
   }
-1
+
   async getRedditKarma(username) {
     const apiUrl = `https://www.reddit.com/user/${username}/about.json`;
     try {

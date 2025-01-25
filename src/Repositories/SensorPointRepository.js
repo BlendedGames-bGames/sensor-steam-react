@@ -12,13 +12,11 @@ db.serialize(() => {
             id_sensor TEXT NOT NULL,
             id_players TEXT NOT NULL,
             data_point TEXT NOT NULL,
-            date_time TEXT NOT NULL,
+            date_time TEXT NOT NULL CHECK(length(date_time) = 10 AND date_time GLOB '????-??-??'),
             hours_played TEXT,
             karma_player TEXT,
             reputation_player TEXT,
             tipe_sensor TEXT NOT NULL
-
-
         )
     `);
 });

@@ -1,6 +1,8 @@
 import axios from 'axios';
 import UserModel from '../Models/UserModel.js'; // Modelo del usuario
 import UserRepository from '../Repositories/UserRepository.js'; // Repositorio del usuario
+import SensorPointService from "../Services/SensorPointService.js";
+import SensorPointRepository from "../Repositories/SensorPointRepository.js";
 
 class UserService {
   constructor(userRepository) {
@@ -37,6 +39,7 @@ class UserService {
 
           // Guardar el usuario en el repositorio
           await UserRepository.createUser(user);
+          //await this.sensorPointService.saveSensorPointReddit(); // Guarda el primer puntos al
           console.log('Usuario guardado en la base de datos');
           return 1; // Usuario encontrado y guardado
         } else {
@@ -81,6 +84,7 @@ class UserService {
         console.log(user);
   
         await UserRepository.updateUser(user);
+        
   
         console.log('Credenciales de Steam actualizadas');
         return true; // Devuelve éxito

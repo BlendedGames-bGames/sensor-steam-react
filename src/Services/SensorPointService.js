@@ -28,9 +28,8 @@ class SensorPointService {
         }
         // Calcular el tiempo total jugado
         const totalMinutes = games.reduce((sum, game) => sum + (game.playtime_forever || 0), 0);
-        const totalHours = (totalMinutes / 60).toFixed(2); // Convertir a horas y redondear
-        console.log(`Total de horas jugadas: ${totalHours}`);
-        return totalHours;
+        console.log(`Total de horas jugadas: ${totalMinutes}`);
+        return totalMinutes;
       } else {
         console.error('Error al obtener los datos de Steam:', response.status);
         return 0;
@@ -45,7 +44,7 @@ class SensorPointService {
     try {
       // Obtener horas jugadas
       const hoursPlayed = await this.getHoursPlayed();
-
+  
       // Obtener el primer usuario de la base de datos
       const users = await this.userService.getAllUsers();
       if (!users || users.length === 0) {
@@ -53,43 +52,83 @@ class SensorPointService {
         return;
       }
       const user = users[0];
-
+  
       // Obtener todos los puntos de sensor de la base de datos
       const points = await SensorPointRepository.getAllSensorPoints('Steam');
-
+  
       // Definir un nuevo punto de sensor
       const newPoint = new SensorPointModel(
         null,
         1,
         user.id_players,
-        10,
-        new Date().toLocaleDateString(),
+        25,
+        new Date().toISOString().split("T")[0],  // Formato YYYY-MM-DD
         hoursPlayed,
         null,
         null,
         "Steam"
       );
       console.log("===Nuevo punto de sensor creado:", newPoint, "====");
-
-      // Lógica para verificar y crear puntos de sensor
+  
       if (points.length === 0) {
-        // Si no hay puntos de sensor registrados, crear el primero
+        // Si no hay puntos registrados, crear el primero
         console.log("No se encontraron puntos de sensor, creando el primero...");
         await SensorPointRepository.createSensorPoint(newPoint);
       } else {
-        // Comparar la fecha del último punto registrado
+        // Obtener el último punto registrado
         const lastPoint = points[points.length - 1];
-        if (lastPoint.date_time < new Date().toLocaleDateString()) { // Si el último punto es de una fecha anterior a la actual se crea un nuevo punto
+  
+        // Convertir fechas para comparación correcta
+        const lastPointDate = new Date(lastPoint.date_time);
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0); // Asegurar comparar solo la fecha sin la hora
+  
+        if (lastPointDate.getTime() < todayDate.getTime()) {
           console.log("El último punto es de una fecha anterior, creando un nuevo punto...");
-          await SensorPointRepository.createSensorPoint(newPoint);
-          console.log("===Nuevo punto de sensor creado:", newPoint, "====");
+          console.log("Diferencia de horas jugadas:", hoursPlayed - lastPoint.hours_played);
+  
+          // Calcular los puntos basados en la diferencia de horas jugadas
+          const updatedPoints = this.calcularPuntos(80 + hoursPlayed - lastPoint.hours_played);
+
+          const nextPoint = new SensorPointModel(
+            null,
+            1,
+            user.id_players,
+            updatedPoints,
+            todayDate.toISOString().split("T")[0],  // Guardar fecha como YYYY-MM-DD
+            hoursPlayed,
+            null,
+            null,
+            "Steam"
+          );
+          await SensorPointRepository.createSensorPoint(nextPoint);
+          console.log("===Nuevo punto de sensor creado:", nextPoint, "====");
         } else {
-          console.log("No se necesita crear un nuevo punto de sensor.");
+          console.log("No se necesita crear un nuevo punto de sensor para hoy.");
         }
       }
     } catch (error) {
       console.error("Error al guardar el punto de sensor:", error.message);
     }
+  }
+  
+  calcularPuntos(minutosJugados) {
+    let puntos = 0;
+    console.log("Minutos jugados:", minutosJugados);
+    const horasJugadas = minutosJugados / 60; // Convierte minutos a horas
+    console.log("Horas jugadas:", horasJugadas);
+  
+    if (horasJugadas <= 1) {
+      // Jugar entre 0 a 60 minutos otorga puntos entre 10 y 150
+      puntos = Math.round(10 + (horasJugadas * 140));
+    } else if (horasJugadas > 1 && horasJugadas <= 2) {
+      // Jugar entre 61 a 120 minutos otorga puntos entre 150 y 50
+      puntos = Math.round(150 - ((horasJugadas - 1) * 100));
+    } else {
+      // Más de 120 minutos de juego otorgan 10 puntos fijos
+      puntos = 10;
+    }
+    return puntos;
   }
 
   
