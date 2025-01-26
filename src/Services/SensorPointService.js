@@ -10,6 +10,39 @@ class SensorPointService {
     this.userService = new UserService(new UserRepository());
     this.httpClient = axios.create();
   }
+  async setDataSteam(key_steam, id_user_steam) {
+    const apiUrl = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${key_steam}&steamid=${id_user_steam}&include_appinfo=true&include_played_free_games=true`;
+  
+    try {
+      const response = await this.httpClient.get(apiUrl);
+  
+      if (response.status === 200) {
+        const users = await this.userService.getAllUsers();
+        const user = users[0];
+  
+        if (!user) {
+          throw new Error('No se encontró el usuario en la base de datos.');
+        }
+  
+        user.key_steam = key_steam;
+        user.id_user_steam = id_user_steam;
+
+        console.log(user);
+  
+        await UserRepository.updateUser(user);
+        await this.saveSensorPoint();
+        
+  
+        console.log('Credenciales de Steam actualizadas');
+        return true; // Devuelve éxito
+      } else {
+        throw new Error('Error en la respuesta de la API de Steam.');
+      }
+    } catch (error) {
+      console.error('Error al obtener los datos del usuario:', error.message);
+      throw new Error('Error al actualizar los datos de Steam para el usuario.');
+    }
+  }
 
   async getHoursPlayed() {
     const user = await this.userService.getAllUsers();

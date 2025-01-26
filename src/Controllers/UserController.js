@@ -76,30 +76,6 @@ class UserController {
       return res.status(500).json({ error: 'Error interno del servidor.' });
     }
   }
-
-  async setDataSteam(req, res) {
-    const { key_steam, id_user_steam } = req.body;
-
-    console.log('key_steam:', key_steam);
-    console.log('id_user_steam:', id_user_steam);
-
-    if (!key_steam || !id_user_steam) {
-      return res.status(400).json({ error: 'La clave de Steam y el ID de usuario son obligatorios.' });
-    }
-
-    try {
-      const result = await this.userService.setDataSteam(key_steam, id_user_steam);
-
-      if (result) {
-        return res.status(200).json({ message: 'Datos de Steam guardados exitosamente.' });
-      } else {
-        return res.status(400).json({ error: 'Los datos de Steam no pudieron ser guardados.' });
-      }
-    } catch (error) {
-      console.error('Error al guardar datos de Steam:', error.message);
-      return res.status(500).json({ error: 'Error interno del servidor.' });
-    }
-  }
 }
 
 
