@@ -80,20 +80,36 @@ class SensorRedditController {
     }
     async checkUserRedditDB(req, res) {
         try {
-          const userReddit = await this.sensorRedditService.checkUserRedditDB();
-          if (userReddit) {
-            // Usuario encontrado
-            return res.status(200).json({ userCreated: true, message: 'Usuario creado' });
-          } else {
-            // Usuario no encontrado
-            return res.status(200).json({ userCreated: false, message: 'Usuario no creado aún' });
-          }
+            const userReddit = await this.sensorRedditService.checkUserRedditDB();
+            if (userReddit) {
+                // Usuario encontrado
+                return res.status(200).json({ userCreated: true, message: 'Usuario creado' });
+            } else {
+                // Usuario no encontrado
+                return res.status(200).json({ userCreated: false, message: 'Usuario no creado aún' });
+            }
         } catch (error) {
-          console.error('Error interno del servidor:', error.message);
-          return res.status(500).json({ error: 'Error interno del servidor.' });
+            console.error('Error interno del servidor:', error.message);
+            return res.status(500).json({ error: 'Error interno del servidor.' });
         }
-      }
-      
+    }
+
+    async saveSensorPointReddit(req, res) {
+        try {
+            const response = await this.sensorRedditService.saveSensorPointReddit();
+            res.status(200).json({
+                message: 'Punto de sensor guardado exitosamente.',
+                data: response
+            });
+        } catch (error) {
+            console.error('Error al guardar el punto de sensor:', error.message);
+            res.status(500).json({
+                message: 'Error interno del servidor al guardar el punto de sensor.',
+                error: error.message
+            });
+        }
+    }
+
 }
 
 export default SensorRedditController;

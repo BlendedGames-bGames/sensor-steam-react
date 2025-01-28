@@ -36,9 +36,9 @@ class SensorRedditService {
     }
   }
 
-  async checkUserRedditDB(){
+  async checkUserRedditDB() {
     const users = await UserRepository.getUsers();
-    const user = users[0];                            
+    const user = users[0];
     if (user.id_reddit) {
       console.log('El usuario tiene cuenta de Reddit');
       return 1;
@@ -56,47 +56,74 @@ class SensorRedditService {
         console.error("No se encontró ningún usuario registrado.");
         return;
       }
-      // Obtener karma de Reddit
+  
+      // Obtener usuario y karma de Reddit
       const user = users[0];
       console.log("Usuario de Reddit:", user);
       const karma = await this.getRedditKarma(user.id_reddit);
-
-      console.log("Karma de Reddit:", karma);
+      console.log("Karma de Reddit obtenido:", karma);
   
-      // Verificar y obtener puntos de sensor existentes
-      const points = await SensorPointRepository.getAllSensorPoints('Reddit');
+      // Obtener puntos de sensor existentes para Reddit
+      const points = await SensorPointRepository.getAllSensorPoints("Reddit");
   
       const newPoint = new SensorPointModel(
         null, // id (se generará automáticamente)
         1, // sensor_id
-        user.id_players, // usuario
-        11, // Puntaje a guardar
-        new Date().toLocaleDateString(), // fecha actual
-        null, // valor adicional
-        karma, // valor obtenido del karma
-        null, // campo adicional
+        user.id_players, // id del jugador
+        25, // puntos iniciales
+        new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
+        null, // horas jugadas
+        karma, // karma que el jugador tiene al crear el punto
+        null, // reputación
         "Reddit" // tipo de sensor
       );
-      console.log("===Nuevo punto de sensor creado Reddit:", newPoint, "====");
+  
+      console.log("===Nuevo punto de sensor creado para Reddit:", newPoint, "====");
+  
       if (points.length === 0) {
+        // Si no hay puntos registrados, crear el primero
         console.log("No se encontraron puntos de sensor, creando el primero...");
         await SensorPointRepository.createSensorPoint(newPoint);
       } else {
-        // Obtener el último punto de sensor y compararlo con la fecha actual
+        // Obtener el último punto registrado
         const lastPoint = points[points.length - 1];
-        if (lastPoint.date_time < new Date().toLocaleDateString()) {
+  
+        // Convertir fechas para comparación
+        const lastPointDate = new Date(lastPoint.date_time);
+        const todayDate = new Date();
+        todayDate.setHours(0, 0, 0, 0); // Aseguramos comparar solo la fecha
+  
+        if (lastPointDate.getTime() < todayDate.getTime()) {
+          // Si la última fecha registrada es anterior a la fecha actual, creamos un nuevo punto
           console.log("El último punto es de una fecha anterior, creando un nuevo punto...");
-          await SensorPointRepository.createSensorPoint(newPoint);
-          console.log("===Punto de sensor guardado exitosamente.===");
+          console.log("Karma obtenido hoy:", karma);
+  
+          // Calcular los puntos basados en el karma
+          // Se resta el karma del punto anterior para obtener el karma ganado en el día
+          const updatedPoints = this.generatePointsReddit(
+            Math.max(0, karma - (lastPoint.karma_player || 0)));
+  
+          const nextPoint = new SensorPointModel(
+            null,
+            1,
+            user.id_players,
+            updatedPoints,
+            todayDate.toISOString().split("T")[0], // Fecha actual en formato YYYY-MM-DD
+            null, // horas jugadas
+            karma, // karma obtenido
+            null, // reputación
+            "Reddit" // tipo de sensor
+          );
+          await SensorPointRepository.createSensorPoint(nextPoint);
+          console.log("===Nuevo punto de sensor creado para Reddit:", nextPoint, "====");
         } else {
-          console.log("No se necesita crear un nuevo punto de sensor, fecha ya registrada.");
+          console.log("No se necesita crear un nuevo punto de sensor para hoy.");
         }
       }
     } catch (error) {
       console.error("Error al guardar el punto de sensor de Reddit:", error.message);
-      throw new Error("Hubo un problema al procesar el punto de sensor.");
     }
-  }
+  }  
 
   async createRedditUser(id_reddit) {
     try {
@@ -115,7 +142,21 @@ class SensorRedditService {
     }
   }
 
-  
+
+  generatePointsReddit(karma_earned) {
+    let points;
+
+    if (karma_earned >= 1 && karma_earned <= 10) {
+      points = karma_earned * 10;
+    } else if (karma_earned >= 11) {
+      points = 110; // recompensa por ganar más de 10 puntos de karma en el día 
+    } else if (karma_earned == 0) {
+      points = 10; // puntos de compensación por no ganar karma
+    } else {
+      points = 5; // puntos mínimos si no cae en los rangos anteriores
+    }
+    return points;
+  }
 }
 
 export default SensorRedditService;
