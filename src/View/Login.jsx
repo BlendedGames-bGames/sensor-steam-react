@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import "../styles/LoginBGamesView.css";
 
 function Login({ setView }) { // Recibe setView como prop
   const [email, setEmail] = useState('');
@@ -25,8 +26,8 @@ function Login({ setView }) { // Recibe setView como prop
     }
   };
   return (
-    <div>
-      <h1>Crear Usuario</h1>
+    <div className='loginBGames-container'>
+      <h1>Login in bGames</h1>
       <form onSubmit={handleSubmit}>
         <div>
           <label>Email:</label>
@@ -38,7 +39,7 @@ function Login({ setView }) { // Recibe setView como prop
           />
         </div>
         <div>
-          <label>Contraseña:</label>
+          <label>Password:</label>
           <input
             type="password"
             value={password}
@@ -46,7 +47,7 @@ function Login({ setView }) { // Recibe setView como prop
             required
           />
         </div>
-        <button type="submit">Crear Usuario</button>
+        <button type="submit">Send</button>
       </form>
       {message && <p>{message}</p>}
     </div>

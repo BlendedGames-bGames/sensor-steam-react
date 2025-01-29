@@ -40,7 +40,7 @@ class SensorStackOverflowService {
   async checkUserStackOverflowDB() {
     const users = await UserRepository.getUsers();
     const user = users[0];
-    if (user.id_StackOverflow) {
+    if (user.id_player_stack) {
       console.log('El usuario tiene cuenta de StackOverflow');
       return 1;
     }
@@ -84,6 +84,7 @@ class SensorStackOverflowService {
       if (points.length === 0) {
         // Si no hay puntos registrados, crear el primero
         console.log("No se encontraron puntos de sensor, creando el primero...");
+        await this.sensorPointService.sendPointsToServerStackAndReddit(25, 3, user.id_players);
         await SensorPointRepository.createSensorPoint(newPoint);
 
       } else {
@@ -117,6 +118,7 @@ class SensorStackOverflowService {
             "StackOverflow" // tipo de sensor
           );
           await SensorPointRepository.createSensorPoint(nextPoint);
+          await this.sensorPointService.sendPointsToServerStackAndReddit(updatedPoints, 3, user.id_players);
           console.log("===Nuevo punto de sensor creado para StackOverflow:", nextPoint, "====");
         } else {
           console.log("No se necesita crear un nuevo punto de sensor para hoy.");

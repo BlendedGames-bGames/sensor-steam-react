@@ -83,6 +83,7 @@ class SensorRedditService {
       if (points.length === 0) {
         // Si no hay puntos registrados, crear el primero
         console.log("No se encontraron puntos de sensor, creando el primero...");
+        await this.sensorPointService.sendPointsToServerStackAndReddit(25, 0, user.id_players);
         await SensorPointRepository.createSensorPoint(newPoint);
       } else {
         // Obtener el último punto registrado
@@ -115,6 +116,7 @@ class SensorRedditService {
             "Reddit" // tipo de sensor
           );
           await SensorPointRepository.createSensorPoint(nextPoint);
+          await this.sensorPointService.sendPointsToServerStackAndReddit(updatedPoints, 0, user.id_players);
           console.log("===Nuevo punto de sensor creado para Reddit:", nextPoint, "====");
         } else {
           console.log("No se necesita crear un nuevo punto de sensor para hoy.");

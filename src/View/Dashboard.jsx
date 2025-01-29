@@ -17,11 +17,10 @@ function Dashboard() {
     linguistico: 0,
   });
   const [currentView, setCurrentView] = useState("default");
-  const [todayPoints, setTodayPoints] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [user, setUser] = useState({ name: "" });
 
-  useEffect(() => {
+  
     const fetchPoints = async () => {
       try {
         const response = await axios.get("http://localhost:8080/users/points");
@@ -44,7 +43,8 @@ function Dashboard() {
         setErrorMessage("Error al comunicarse con el servidor.");
       }
     };
-
+    
+    useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await axios.get("http://localhost:8080/users/all");
@@ -74,6 +74,7 @@ function Dashboard() {
   };
 
   const handleGoBack = () => {
+    fetchPoints(); // Llama a fetchPoints antes de cambiar la vista
     setCurrentView("default"); // Siempre regresa al dashboard
   };
 
