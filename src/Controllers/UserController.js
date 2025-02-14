@@ -19,8 +19,9 @@ class UserController {
 
     try {
       const user = await this.userService.createUser(email, password);
-
+      console.log('Usuario creado:', user);
       if (user) {
+        
         res.status(201).json({ message: 'Usuario creado exitosamente.', user });
       } else {
         res.status(400).json({ error: 'El usuario no pudo ser creado.' });

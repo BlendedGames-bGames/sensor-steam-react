@@ -101,13 +101,14 @@ class SensorPointService {
         null,
         "Steam"
       );
-      console.log("===Nuevo punto de sensor creado:", newPoint, "====");
+      console.log("=== Primer punto de sensor creado:", newPoint, "====");
 
       if (points.length === 0) {
         // Si no hay puntos registrados, crear el primero
         console.log("No se encontraron puntos de sensor, creando el primero...");
         await SensorPointRepository.createSensorPoint(newPoint);
         await this.sendPointsToServerStackAndReddit(25, this.randomInt(), user.id_players);
+        return;
       } else {
         // Obtener el último punto registrado
         const lastPoint = points[points.length - 1];
@@ -137,7 +138,7 @@ class SensorPointService {
           );
           await SensorPointRepository.createSensorPoint(nextPoint);
           await this.sendPointsToServerStackAndReddit(updatedPoints, this.randomInt(), user.id_players);
-          console.log("===Nuevo punto de sensor creado:", nextPoint, "====");
+          console.log("=== Nuevo punto de sensor creado:", nextPoint, "====");
         } else {
           console.log("No se necesita crear un nuevo punto de sensor para hoy.");
         }

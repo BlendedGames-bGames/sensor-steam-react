@@ -5,16 +5,33 @@ import UserService from "../Services/UserService.js";
 import SensorPointModel from "../Models/SensorPointModel.js";
 import SensorPointService from "../Services/SensorPointService.js";
 import SensorPointRepository from "../Repositories/SensorPointRepository.js";
+import cron from "node-cron";
 
 class SensorStackOverflowService {
   constructor(userRepository) {
     this.userService = new UserService(new UserRepository());
     this.sensorPointService = new SensorPointService(new SensorPointRepository());
     this.httpClient = axios.create();
+
+    cron.schedule(
+      '00 22 * * *', // La funcion se ejecutara cada dia a las 10 PM
+      async () => {
+        try {
+          console.log("Ejecutando saveSensorPointStackOverflow a las 10 PM...");
+          await this.saveSensorPointStackOverflow(); 
+          console.log("Proceso de Stack Overflow completado.");
+        } catch (error) {
+          console.error("Error en el proceso de Stack Overflow:", error);
+        }
+      },
+      {
+        scheduled: true,
+        timezone: "America/Santiago"
+      }
+    );
   }
 
   async getStackOverflowReputation(id_stackO) {
-    //const id_stackO = 90525;
     console.log("ID de usuario en StackOverflow:", id_stackO);
     const apiUrl = `https://api.stackexchange.com/2.3/users/${id_stackO}?site=stackoverflow`;
     try {
@@ -91,12 +108,19 @@ class SensorStackOverflowService {
         // Obtener el último punto registrado
         const lastPoint = points[points.length - 1];
 
-        // Convertir fechas para comparación
-        const lastPointDate = new Date(lastPoint.date_time);
+        // Convertir fechas correctamente
+        const lastPointDate = new Date(lastPoint.date_time + "T00:00:00"); // Asegura que se tome como local
         const todayDate = new Date();
-        todayDate.setHours(0, 0, 0, 0); // Aseguramos comparar solo la fecha
+        todayDate.setHours(0, 0, 0, 0); // Asegura comparar solo la fecha
+
+        // Imprimir valores para depuración
+        console.log("Last Point Date (raw):", lastPoint.date_time);
+        console.log("Converted Last Point Date:", lastPointDate.toISOString());
+        console.log("Today Date:", todayDate.toISOString());
 
         if (lastPointDate.getTime() < todayDate.getTime()) {
+          console.log("---------------------------lastPointDate:", lastPointDate.getTime());
+          console.log("---------------------------todayDate:", todayDate.getTime());
           // Si la última fecha registrada es anterior a la fecha actual, creamos un nuevo punto
           console.log("El último punto es de una fecha anterior, creando un nuevo punto...");
           console.log("reputation obtenido hoy:", reputation);
@@ -113,15 +137,15 @@ class SensorStackOverflowService {
             updatedPoints,
             todayDate.toISOString().split("T")[0], // Fecha actual en formato YYYY-MM-DD
             null, // horas jugadas
-            reputation, // reputation obtenido
-            null, // reputación
+            null,
+            reputation, // reputación
             "StackOverflow" // tipo de sensor
           );
           await SensorPointRepository.createSensorPoint(nextPoint);
           await this.sensorPointService.sendPointsToServerStackAndReddit(updatedPoints, 3, user.id_players);
           console.log("===Nuevo punto de sensor creado para StackOverflow:", nextPoint, "====");
         } else {
-          console.log("No se necesita crear un nuevo punto de sensor para hoy.");
+          console.log("==No se necesita crear un nuevo punto de sensor para hoy==");
         }
       }
     } catch (error) {
@@ -153,18 +177,27 @@ class SensorStackOverflowService {
   }
 
   generatePointsStackOverflow(reputation) {
+    console.log("Reputation:", reputation); 
     let puntos = 0;
     if (reputation >= 1 && reputation <= 50) {
       puntos = reputation * 2;
+      console.log("187 Puntos obtenidos:", puntos);
+      return puntos;
     }
     else if (reputation >= 51) { // recompensa por ganar más de 50 puntos de reputacion en StackOverflow
       puntos = 110;
+      console.log("192 Puntos obtenidos:", puntos);
+      return puntos;
     }
     else if (reputation == 0) {
       puntos = 10;
+      console.log("197 Puntos obtenidos:", puntos);
+      return puntos;
     }
     else { //Caso en que la reputacion disminuya respecto al dia anterior
       puntos = 5;
+      console.log("202 Puntos obtenidos:", puntos);
+      puntos = 10;
     }
   }
 }
