@@ -22,6 +22,9 @@ db.serialize(() => {
 });
 
 class UserRepository {
+  constructor(db) {
+    this.db = db; // 🔥 Usamos la misma base de datos en memoria
+  }
   // Crear un usuario
   static createUser(user) {
     if (!(user instanceof UserModel)) {
@@ -152,6 +155,22 @@ static updateUser(user) { // Se puede usar para todos
     );
   });
 }
+
+static deleteAllUsers() {
+  return new Promise((resolve, reject) => {
+      const query = `DELETE FROM users`;
+      db.run(query, function (err) {
+          if (err) {
+              console.error("❌ Error al borrar todos los usuarios:", err.message);
+              reject(err);
+          } else {
+              console.log(`✅ Todos los usuarios han sido eliminados (${this.changes} filas afectadas).`);
+              resolve(this.changes); // Retorna la cantidad de filas eliminadas
+          }
+      });
+  });
+}
+
 
   /*
   // Actualizar un usuario

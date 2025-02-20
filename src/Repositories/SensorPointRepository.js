@@ -22,6 +22,9 @@ db.serialize(() => {
 });
 
 class SensorPointRepository {
+    constructor(db) {
+        this.db = db; // 🔥 Usamos la misma base de datos en memoria
+      }
     // Crear un punto de sensor
     static createSensorPoint(sensorPoint) {
         if (!(sensorPoint instanceof SensorPointModel)) {

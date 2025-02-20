@@ -13,15 +13,25 @@ class SensorStackOverflowService {
     this.sensorPointService = new SensorPointService(new SensorPointRepository());
     this.httpClient = axios.create();
 
+    // Tarea programada para ejecutarse a las 10 PM todos los días
     cron.schedule(
-      '00 22 * * *', // La funcion se ejecutara cada dia a las 10 PM
+      '00 22 * * *',
       async () => {
-        try {
-          console.log("Ejecutando saveSensorPointStackOverflow a las 10 PM...");
-          await this.saveSensorPointStackOverflow(); 
-          console.log("Proceso de Stack Overflow completado.");
-        } catch (error) {
-          console.error("Error en el proceso de Stack Overflow:", error);
+        console.log("Verificando conexión con servidores...");
+        let conectado = await checkServerStatus();
+
+        if (!conectado) {
+          console.log("No hay conexión con los servidores, reintentando cada minuto...");
+          const retryInterval = setInterval(async () => {
+            let reintento = await checkServerStatus();
+            if (reintento) {
+              clearInterval(retryInterval);
+              console.log("Conexión restablecida. Ejecutando el proceso...");
+              await ejecutarProceso();
+            }
+          }, 60000); // Reintenta cada 1 minuto
+        } else {
+          await ejecutarProceso();
         }
       },
       {
@@ -29,6 +39,40 @@ class SensorStackOverflowService {
         timezone: "America/Santiago"
       }
     );
+  }
+
+  async checkServerStatus() {
+    let apiUrl1 = 'http://localhost:3002/';
+    let apiUrl2 = 'http://localhost:3001/';
+    let apiUrl3 = 'http://localhost:3010/';
+    try {
+      const [response1, response2, response3] = await Promise.all([
+        axios.get(apiUrl1),
+        axios.get(apiUrl2),
+        axios.get(apiUrl3)
+      ]);
+
+      if (response1.status === 200 && response2.status === 200 && response3.status === 200) {
+        console.log("Todos los servidores están en línea.");
+        return true;
+      }
+    } catch (error) {
+      console.error("Error de conexión con los servidores:", error.message);
+      return false;
+    }
+  }
+
+  async ejecutarProceso() {
+    try {
+      if (checkUserStackOverflowDB() == 0) {
+        console.log("No existe una cuenta vinculada...");
+        return;
+      }
+      await this.saveSensorPointStackOverflow();
+      console.log("Creando nuevo punto...");
+    } catch (error) {
+      console.error("Error en el proceso de Stack Overflow:", error.message);
+    }
   }
 
   async getStackOverflowReputation(id_stackO) {
@@ -66,7 +110,7 @@ class SensorStackOverflowService {
   }
 
   async saveSensorPointStackOverflow() {
-    console.log("Guardando punto de sensor de StackOverflow...");
+    console.log("=== Guardando punto de sensor de StackOverflow... ===");
     try {
       // Obtener usuarios y verificar existencia
       const users = await this.userService.getAllUsers();
@@ -74,79 +118,73 @@ class SensorStackOverflowService {
         console.error("No se encontró ningún usuario registrado.");
         return;
       }
-
-      // Obtener usuario y reputation de StackOverflow
+      // Obtener usuario y reputación de StackOverflow
       const user = users[0];
       console.log("Usuario de StackOverflow:", user);
       const reputation = await this.getStackOverflowReputation(user.id_player_stack);
-      console.log("reputation de StackOverflow obtenido:", reputation);
+      console.log("Reputación de StackOverflow obtenida:", reputation);
 
-      // Obtener puntos de sensor existentes para StackOverflow
+      // Obtener todos los puntos de sensor para StackOverflow
       const points = await SensorPointRepository.getAllSensorPoints("StackOverflow");
 
-      const newPoint = new SensorPointModel(
-        null, // id (se generará automáticamente)
-        1, // sensor_id
-        user.id_players, // id del jugador
-        25, // puntos iniciales
-        new Date().toISOString().split("T")[0], // Formato YYYY-MM-DD
-        null, // horas jugadas
-        null, // reputation que el jugador tiene al crear el punto
-        reputation, // reputación
-        "StackOverflow" // tipo de sensor
-      );
-
-      console.log("===Nuevo punto de sensor creado para StackOverflow:", newPoint, "====");
+      // Definir la fecha actual en formato YYYY-MM-DD
+      const todayDate = new Date();
+      todayDate.setHours(0, 0, 0, 0);
+      const todayFormatted = todayDate.toISOString().split("T")[0];
+      console.log("Fecha de hoy:", todayFormatted);
 
       if (points.length === 0) {
         // Si no hay puntos registrados, crear el primero
         console.log("No se encontraron puntos de sensor, creando el primero...");
-        await this.sensorPointService.sendPointsToServerStackAndReddit(25, 3, user.id_players);
-        await SensorPointRepository.createSensorPoint(newPoint);
 
+        const firstPoint = new SensorPointModel(
+          null,
+          1,
+          user.id_players,
+          25,  // Puntos iniciales
+          todayFormatted, // Fecha YYYY-MM-DD
+          null, // Horas jugadas no aplican en StackOverflow
+          null, // Karma
+          reputation, // Reputación al momento de la creación
+          "StackOverflow"
+        );
+
+        await SensorPointRepository.createSensorPoint(firstPoint);
+        await this.sendPointsToServerStackAndReddit(25, 3, user.id_players);
+        console.log("=== Primer punto de sensor creado: ===", firstPoint);
+        return;
+      }
+      // Obtener el último punto registrado
+      const lastPoint = points[points.length - 1];
+
+      // Convertir `lastPoint.date_time` a una fecha válida
+      const lastPointDate = new Date(lastPoint.date_time + "T00:00:00");
+      console.log("Última fecha registrada:", lastPointDate.toISOString().split("T")[0]);
+
+      if (lastPointDate.toISOString().split("T")[0] < todayFormatted) {
+        // Si la última fecha registrada es anterior a la fecha actual, crear un nuevo punto
+        console.log("El último punto es de una fecha anterior, creando un nuevo punto...");
+        console.log("Reputación obtenida hoy:", reputation);
+
+        // Calcular los puntos basados en la reputación ganada hoy
+        const reputationDiferencial = Math.max(0, reputation - (lastPoint.reputation_player || 0));
+        const updatedPoints = this.generatePointsStackOverflow(reputationDiferencial);
+        const nextPoint = new SensorPointModel(
+          null,
+          1,
+          user.id_players,
+          updatedPoints,
+          todayFormatted, // Fecha actual en formato YYYY-MM-DD
+          null, // Horas jugadas no aplican en StackOverflow
+          null, // Karma
+          reputation, // Reputación obtenida
+          "StackOverflow"
+        );
+        await SensorPointRepository.createSensorPoint(nextPoint);
+        await this.sendPointsToServerStackAndReddit(updatedPoints, 3, user.id_players);
+        console.log("=== Nuevo punto de sensor creado para StackOverflow: ===", nextPoint);
       } else {
-        // Obtener el último punto registrado
-        const lastPoint = points[points.length - 1];
-
-        // Convertir fechas correctamente
-        const lastPointDate = new Date(lastPoint.date_time + "T00:00:00"); // Asegura que se tome como local
-        const todayDate = new Date();
-        todayDate.setHours(0, 0, 0, 0); // Asegura comparar solo la fecha
-
-        // Imprimir valores para depuración
-        console.log("Last Point Date (raw):", lastPoint.date_time);
-        console.log("Converted Last Point Date:", lastPointDate.toISOString());
-        console.log("Today Date:", todayDate.toISOString());
-
-        if (lastPointDate.getTime() < todayDate.getTime()) {
-          console.log("---------------------------lastPointDate:", lastPointDate.getTime());
-          console.log("---------------------------todayDate:", todayDate.getTime());
-          // Si la última fecha registrada es anterior a la fecha actual, creamos un nuevo punto
-          console.log("El último punto es de una fecha anterior, creando un nuevo punto...");
-          console.log("reputation obtenido hoy:", reputation);
-
-          // Calcular los puntos basados en el reputation
-          // Se resta el reputation del punto anterior para obtener el reputation ganado en el día
-          const updatedPoints = this.generatePointsStackOverflow(
-            Math.max(0, reputation - (lastPoint.reputation_player || 0)));
-
-          const nextPoint = new SensorPointModel(
-            null,
-            1,
-            user.id_players,
-            updatedPoints,
-            todayDate.toISOString().split("T")[0], // Fecha actual en formato YYYY-MM-DD
-            null, // horas jugadas
-            null,
-            reputation, // reputación
-            "StackOverflow" // tipo de sensor
-          );
-          await SensorPointRepository.createSensorPoint(nextPoint);
-          await this.sensorPointService.sendPointsToServerStackAndReddit(updatedPoints, 3, user.id_players);
-          console.log("===Nuevo punto de sensor creado para StackOverflow:", nextPoint, "====");
-        } else {
-          console.log("==No se necesita crear un nuevo punto de sensor para hoy==");
-        }
+        console.log("No se necesita crear un nuevo punto de sensor para hoy.");
       }
     } catch (error) {
       console.error("Error al guardar el punto de sensor de StackOverflow:", error.message);
@@ -177,7 +215,7 @@ class SensorStackOverflowService {
   }
 
   generatePointsStackOverflow(reputation) {
-    console.log("Reputation:", reputation); 
+    console.log("Reputation:", reputation);
     let puntos = 0;
     if (reputation >= 1 && reputation <= 50) {
       puntos = reputation * 2;
