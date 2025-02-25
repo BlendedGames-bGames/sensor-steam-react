@@ -6,6 +6,7 @@ import RedditView from "./RedditView.jsx";
 import OverflowView from "./OverflowView.jsx";
 import SteamLogin from "./SteamLogin.jsx";
 import Sidebar from "../Components/Sidebar.jsx";
+import personeIcon from "../assets/person.png";
 
 
 function Dashboard() {
@@ -109,7 +110,7 @@ function Dashboard() {
               <div className="profile">
                 <span>{user.name}</span>
                 <div className="avatar">
-                  <img src="./src/assets/person.png" alt="avatar" />
+                  <img src={personeIcon} alt="avatar" />
                 </div>
               </div>
             </div>
