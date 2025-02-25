@@ -18,20 +18,20 @@ class SensorStackOverflowService {
       '00 22 * * *',
       async () => {
         console.log("Verificando conexión con servidores...");
-        let conectado = await checkServerStatus();
+        let conectado = await this.sensorPointService.checkServerStatus();
 
         if (!conectado) {
           console.log("No hay conexión con los servidores, reintentando cada minuto...");
           const retryInterval = setInterval(async () => {
-            let reintento = await checkServerStatus();
+            let reintento = await this.sensorPointService.checkServerStatus();
             if (reintento) {
               clearInterval(retryInterval);
               console.log("Conexión restablecida. Ejecutando el proceso...");
-              await ejecutarProceso();
+              await this.ejecutarProceso();
             }
           }, 60000); // Reintenta cada 1 minuto
         } else {
-          await ejecutarProceso();
+          await this.ejecutarProceso();
         }
       },
       {
@@ -41,30 +41,9 @@ class SensorStackOverflowService {
     );
   }
 
-  async checkServerStatus() {
-    let apiUrl1 = 'http://localhost:3002/';
-    let apiUrl2 = 'http://localhost:3001/';
-    let apiUrl3 = 'http://localhost:3010/';
-    try {
-      const [response1, response2, response3] = await Promise.all([
-        axios.get(apiUrl1),
-        axios.get(apiUrl2),
-        axios.get(apiUrl3)
-      ]);
-
-      if (response1.status === 200 && response2.status === 200 && response3.status === 200) {
-        console.log("Todos los servidores están en línea.");
-        return true;
-      }
-    } catch (error) {
-      console.error("Error de conexión con los servidores:", error.message);
-      return false;
-    }
-  }
-
   async ejecutarProceso() {
     try {
-      if (checkUserStackOverflowDB() == 0) {
+      if (this.checkUserStackOverflowDB() == 0) {
         console.log("No existe una cuenta vinculada...");
         return;
       }
@@ -150,7 +129,7 @@ class SensorStackOverflowService {
         );
 
         await SensorPointRepository.createSensorPoint(firstPoint);
-        await this.sendPointsToServerStackAndReddit(25, 3, user.id_players);
+        await this.sensorPointService.sendPointsToServerStackAndReddit(25, 3, user.id_players);
         console.log("=== Primer punto de sensor creado: ===", firstPoint);
         return;
       }
@@ -181,7 +160,7 @@ class SensorStackOverflowService {
           "StackOverflow"
         );
         await SensorPointRepository.createSensorPoint(nextPoint);
-        await this.sendPointsToServerStackAndReddit(updatedPoints, 3, user.id_players);
+        await this.sensorPointService.sendPointsToServerStackAndReddit(updatedPoints, 3, user.id_players);
         console.log("=== Nuevo punto de sensor creado para StackOverflow: ===", nextPoint);
       } else {
         console.log("No se necesita crear un nuevo punto de sensor para hoy.");

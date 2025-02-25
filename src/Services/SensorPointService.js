@@ -3,13 +3,88 @@ import UserService from "../Services/UserService.js";
 import UserRepository from "../Repositories/UserRepository.js";
 import axios from 'axios';
 import SensorPointModel from "../Models/SensorPointModel.js";
+import cron from "node-cron";
 
 class SensorPointService {
   constructor(sensorPointRepository) {
     this.sensorPointRepository = sensorPointRepository;
     this.userService = new UserService(new UserRepository());
     this.httpClient = axios.create();
+
+    // Tarea programada para ejecutarse a las 10 PM todos los días
+    cron.schedule(
+      '00 22 * * *',
+      async () => {
+        console.log("Verificando conexión con servidores...");
+        let conectado = await this.checkServerStatus();
+
+        if (!conectado) {
+          console.log("No hay conexión con los servidores, reintentando cada minuto...");
+          const retryInterval = setInterval(async () => {
+            let reintento = await this.checkServerStatus();
+            if (reintento) {
+              clearInterval(retryInterval);
+              console.log("Conexión restablecida. Ejecutando el proceso...");
+              await this.ejecutarProceso();
+            }
+          }, 60000); // Reintenta cada 1 minuto
+        } else {
+          await this.ejecutarProceso();
+        }
+      },
+      {
+        scheduled: true,
+        timezone: "America/Santiago"
+      }
+    );
   }
+
+  async checkServerStatus() {
+    console.log("Verificando conexión con los servidores...");
+    let apiUrl1 = 'http://localhost:3002/';
+    let apiUrl2 = 'http://localhost:3001/';
+    let apiUrl3 = 'http://localhost:3010/';
+    try {
+      const [response1, response2, response3] = await Promise.all([
+        this.httpClient.get(apiUrl1),
+        this.httpClient.get(apiUrl2),
+        this.httpClient.get(apiUrl3)
+      ]);
+      // /await this.httpClient.get(apiUrl);
+      if (response1.status === 200 && response2.status === 200 && response3.status === 200) {
+        console.log("Todos los servidores están en línea.");
+        return true;
+      }
+    } catch (error) {
+      console.error("Error de conexión con los servidores:", error.message);
+      return false;
+    }
+  }
+
+  async ejecutarProceso() {
+    try {
+      if (this.checkUserSteamDB() == 0) {
+        console.log("No existe una cuenta vinculada...");
+        return;
+      }
+      await this.saveSensorPoint();
+      console.log("Creando nuevo punto...");
+    } catch (error) {
+      console.error("Error en el proceso de Stack Overflow:", error.message);
+    }
+  }
+
+  async checkUserSteamDB() {
+    const users = await UserRepository.getUsers();
+    const user = users[0];
+    if (user.key_steam && user.id_user_steam) {
+      console.log('El usuario tiene cuenta de Reddit');
+      return 1;
+    }
+    console.log('El usuario no tiene cuenta de Reddit');
+    return 0;
+  }
+
   async setDataSteam(key_steam, id_user_steam) {
     const apiUrl = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${key_steam}&steamid=${id_user_steam}&include_appinfo=true&include_played_free_games=true`;
 
@@ -194,71 +269,6 @@ class SensorPointService {
     }
   }
 
-
-  /*
-  async getAllSensorPoints(tipe_sensor) {
-
-    try {
-      const points = await SensorPointRepository.getAllSensorPoints(tipe_sensor);
-      return points;
-    } catch (error) {
-      console.error("No se pudieron obtener los puntos del sensor", error.message);
-    }
-  }
-  
-
-  async saveSensorPointReddit() {
-    try {
-      // Obtener usuarios y verificar existencia
-      const users = await this.userService.getAllUsers();
-      if (!users || users.length === 0) {
-        console.error("No se encontró ningún usuario registrado.");
-        return;
-      }
-
-      // Obtener karma de Reddit
-      const user = users[0];
-      const karma = await this.sensorRedditService.getRedditKarma(user.id_reddit);
-
-      console.log("Karma de Reddit:", karma);
-
-      // Verificar y obtener puntos de sensor existentes
-      const points = await SensorPointRepository.getAllSensorPoints();
-
-      const newPoint = new SensorPointModel(
-        null, // id (se generará automáticamente)
-        1, // sensor_id
-        user.id_players, // usuario
-        25, // valor predefinido
-        new Date().toLocaleDateString(), // fecha actual
-        null, // valor adicional
-        karma, // valor obtenido del karma
-        null, // campo adicional
-        "Reddit" // tipo de sensor
-      );
-
-      console.log("===Nuevo punto de sensor creado Reddit:", newPoint, "====");
-
-      if (points.length === 0) {
-        console.log("No se encontraron puntos de sensor, creando el primero...");
-        await SensorPointRepository.createSensorPoint(newPoint);
-      } else {
-        // Obtener el último punto de sensor y compararlo con la fecha actual
-        const lastPoint = points[points.length - 1];
-        if (lastPoint.date_time < new Date().toLocaleDateString()) {
-          console.log("El último punto es de una fecha anterior, creando un nuevo punto...");
-          await SensorPointRepository.createSensorPoint(newPoint);
-          console.log("===Punto de sensor guardado exitosamente.===");
-        } else {
-          console.log("No se necesita crear un nuevo punto de sensor, fecha ya registrada.");
-        }
-      }
-    } catch (error) {
-      console.error("Error al guardar el punto de sensor de Reddit:", error.message);
-      throw new Error("Hubo un problema al procesar el punto de sensor.");
-    }
-  }
-*/
   async sendPointsToServerStackAndReddit(points, id_attributes, id_player) {
     const totalPoints = await this.getPointBgames(id_player, id_attributes);
     console.log("|||||--------Puntos de Bgames:", totalPoints);

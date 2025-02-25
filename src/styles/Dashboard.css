@@ -28,18 +28,16 @@ body {
 
 .profile {
   display: flex;
-  align-items: center;
 }
 
 .profile span {
   margin-right: 10px;
+  margin-top: 12px;
 }
 
-.avatar {
-  width: 40px;
-  height: 40px;
-  background-color: #ffffff7c;
-  border-radius: 50%;
+.avatar img{
+  max-width: 50px;
+  margin-bottom: 50px;
 }
 
 /* Points Section */

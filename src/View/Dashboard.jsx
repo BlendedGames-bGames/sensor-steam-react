@@ -108,7 +108,9 @@ function Dashboard() {
             <div className="header">
               <div className="profile">
                 <span>{user.name}</span>
-                <div className="avatar"></div>
+                <div className="avatar">
+                  <img src="./src/assets/person.png" alt="avatar" />
+                </div>
               </div>
             </div>
 

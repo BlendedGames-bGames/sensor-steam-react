@@ -5,7 +5,7 @@ function Sidebar({ setCurrentView }) {
   return (
     <div className="sidebar">
       <div className="logo">
-        <img src="src/assets/bgames_icon.png" alt="Logo" />
+        <img src="./src/assets/bgames_icon.png" alt="Logo" />
       </div>
       <button className="button" onClick={() => setCurrentView("reddit")}>
         Reddit Data
