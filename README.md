@@ -61,7 +61,7 @@ npm start
 ---
 # Exportar la aplicacion
 Para exportar la aplicacion, es necesario editar los archivo:
-- electron.js (\sensor-steam-react\public\electron.js)
+- electron.js (ruta: \sensor-steam-react\public\electron.js)
 - vite.config.js
 - package.json
 - --
@@ -73,11 +73,11 @@ Instalado la libreria es necesario contruir el front-end, con el siguiente coman
 ```shell
 npm run build:frontend 
 ```
-Como ultimo paso, es necesario construir el resto del proyecot:
+Como ultimo paso, es necesario construir el resto del proyecto:
 ```shell
 npm run make
 ```
-Se creara una carpeta llamada 'Out', dentro estara la aplicacion en un formato .exe (\sensor-steam-react\out\sensor-steam-react-win32-x64\sensor-steam-react.exe)
+Se creara una carpeta llamada 'Out', dentro estara la aplicacion en un formato .exe (con la ruta: \sensor-steam-react\out\sensor-steam-react-win32-x64\sensor-steam-react.exe)
 
 
 
