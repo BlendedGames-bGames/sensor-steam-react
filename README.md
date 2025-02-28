@@ -1,5 +1,8 @@
 # bGames Sensor - Steam, StackOverflow & Reddit
 
+[![es](https://img.shields.io/badge/lang-es-green.svg)](./README-ES.md)
+[![en](https://img.shields.io/badge/lang-en-blue.svg)](./README.md)
+
 bGames is a technology designed to create a balance between daily activities and video games. Your daily tasks help you improve in games! With bGames, you can earn points based on your daily activities. Using sensors, your data is collected and transformed into points, which can be used to enhance your character in the game.
 
 The application includes three sensors, each collecting specific data and converting it into bGames points:
