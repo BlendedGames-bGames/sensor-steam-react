@@ -111,6 +111,9 @@ function SteamLogin() {
                 required
               />
             </div>
+            <span>
+              You can get your Steam Api Key <a href="https://steamcommunity.com/dev/apikey" target="_blank" rel="noreferrer">here</a>.
+            </span>
             <button type="submit">Send</button>
           </form>
           {message && <p>{message}</p>}
