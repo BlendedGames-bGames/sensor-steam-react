@@ -10,6 +10,8 @@ The application includes three sensors, each collecting specific data and conver
 - **Reddit Sensor:** Captures the karma gained during the day.
 - **StackOverflow Sensor:** Tracks the reputation earned on your account throughout the day.
 
+## [Download [Sensor bGames](https://github.com/MoisesGodoy17/sensor-steam-react/releases/tag/sensor-bgames)]  
+
 # Sensor Features:
 
 ### **Login with a bGames account inside the sensor.**
@@ -35,7 +37,7 @@ The application includes three sensors, each collecting specific data and conver
 # How to run the bGames sensor
 
 - You need to download the cloud services from [bGames](https://github.com/BlendedGames-bGames/bGames-dev-services.git).
-- Download the application (the download link is found in the `sensor-bgames.txt` file).
+- Download the [aplication](https://github.com/MoisesGodoy17/sensor-steam-react/releases/tag/sensor-bgames)
 - Navigate to the `sensor-steam-react-win32-x64` folder and click on the `sensor-steam-react.exe` executable.
 
 (**The sensor captures data at 22:00, so the application must be running for it to function correctly.**)
