@@ -1,5 +1,6 @@
-/*
+
 //-- Copiar si se quiere exportar la aplicacion
+/*
 import { app, BrowserWindow } from 'electron';
 import { fork } from 'child_process';
 import path from 'path';

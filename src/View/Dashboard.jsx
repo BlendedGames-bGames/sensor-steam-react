@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import "../styles/Dashboard.css";
 import "../styles/ButtonBackDashView.css";
@@ -8,7 +8,6 @@ import SteamLogin from "./SteamLogin.jsx";
 import Sidebar from "../Components/Sidebar.jsx";
 import personeIcon from "../assets/person.png";
 
-
 function Dashboard() {
   const [points, setPoints] = useState({
     social: 0,
@@ -17,35 +16,54 @@ function Dashboard() {
     cognitivo: 0,
     linguistico: 0,
   });
+  const prevPointsRef = useRef(points); // Referencia para guardar puntos anteriores
+  const firstLoadRef = useRef(true);    // Detecta si es la primera carga
+
   const [currentView, setCurrentView] = useState("default");
   const [errorMessage, setErrorMessage] = useState("");
   const [user, setUser] = useState({ name: "" });
-
   
-    const fetchPoints = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/users/points");
 
-        if (response.status === 200) {
-          const pointsData = response.data;
+  const fetchPoints = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/users/points");
 
-          const mappedPoints = {
-            social: pointsData.find((p) => p.name === "Social")?.data || 0,
-            fisica: pointsData.find((p) => p.name === "Fisica")?.data || 0,
-            afectivo: pointsData.find((p) => p.name === "Afectivo")?.data || 0,
-            cognitivo: pointsData.find((p) => p.name === "Cognitivo")?.data || 0,
-            linguistico: pointsData.find((p) => p.name === "Linguistico")?.data || 0,
-          };
-          setPoints(mappedPoints);
-        } else {
-          setErrorMessage("No se pudieron obtener los puntos.");
+      if (response.status === 200) {
+        const pointsData = response.data;
+
+        const newPoints = {
+          social: pointsData.find((p) => p.name === "Social")?.data || 0,
+          fisica: pointsData.find((p) => p.name === "Fisica")?.data || 0,
+          afectivo: pointsData.find((p) => p.name === "Afectivo")?.data || 0,
+          cognitivo: pointsData.find((p) => p.name === "Cognitivo")?.data || 0,
+          linguistico: pointsData.find((p) => p.name === "Linguistico")?.data || 0,
+        };
+
+        const prevPoints = prevPointsRef.current;
+
+        // Detectar si alguno de los puntos aumentó
+        const increased = Object.keys(newPoints).some(
+          (key) => newPoints[key] > prevPoints[key]
+        );
+        
+        // Solo mostramos alerta si NO es la primera carga
+        if (increased && !firstLoadRef.current) {
+          alert("You have earned bGames points!");
         }
-      } catch (error) {
-        setErrorMessage("Error al comunicarse con el servidor.");
+        
+        firstLoadRef.current = false; // Marca que ya pasamos la primera carga
+
+        prevPointsRef.current = newPoints; // Actualiza los puntos anteriores
+        setPoints(newPoints);
+      } else {
+        setErrorMessage("No se pudieron obtener los puntos.");
       }
-    };
-    
-    useEffect(() => {
+    } catch (error) {
+      setErrorMessage("Error al comunicarse con el servidor.");
+    }
+  };
+
+  useEffect(() => {
     const fetchUser = async () => {
       try {
         const response = await axios.get("http://localhost:8080/users/all");
@@ -134,6 +152,8 @@ function Dashboard() {
 }
 
 export default Dashboard;
+
+
 
 
 
