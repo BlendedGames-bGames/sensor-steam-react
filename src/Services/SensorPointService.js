@@ -12,6 +12,13 @@ class SensorPointService {
     this.httpClient = axios.create();
 
     // Tarea programada para ejecutarse a las 10 PM todos los días
+    /**
+   * Funcion encargada de ejecutar de forma automatica la funcion de generar puntos bGames. 
+   * Ejecuta el metodo 'saveSensorPoint()' a las 22:00, hora del equipo local.
+   *
+   * @returns {} Se ejecutade forma correcta los servicios bGames esten online y el usuario tenga el sensor Steam vinculado.
+   * @throws {Error} Si no se puede conectar a los servidores o si el usuario no tiene una cuenta vinculada.
+   */
     cron.schedule(
       '00 22 * * *',
       async () => {
@@ -33,11 +40,16 @@ class SensorPointService {
         }
       },
       {
-        scheduled: true,
-        timezone: "America/Santiago"
+        scheduled: true
       }
     );
   }
+
+  /**
+ * Verifica los servidores de bGames se encuentran disponibles.
+ *
+ * @returns {Promise<boolean>} Retorna true si estan funcionando, es caso contrario, retorna false notificando que no estan online.
+ */
 
   async checkServerStatus() {
     console.log("Verificando conexión con los servidores...");
@@ -61,29 +73,58 @@ class SensorPointService {
     }
   }
 
+  /**
+ * Ejecuta el proceso principal de sensor de Steam.
+ *
+ * 1. Verifica si el usuario tiene una cuenta de Steam vinculada llamando a `checkUserSteamDB`.
+ * 2. Si tiene una cuenta, procede a guardar el punto con `saveSensorPoint`.
+ * 3. Si no tiene una cuenta, aborta el proceso.
+ *
+ * Maneja errores que puedan ocurrir durante el proceso.
+ *
+ * @async
+ * @returns {Promise<void>} No retorna ningún valor.
+ */
+
   async ejecutarProceso() {
     try {
-      if (this.checkUserSteamDB() == 0) {
-        console.log("No existe una cuenta vinculada...");
+      const tieneCuentaSteam = await this.checkUserSteamDB();
+
+      if (!tieneCuentaSteam) {
+        console.log(" No existe una cuenta vinculada. Abortando...");
         return;
       }
+
+      console.log("Usuario válido. Creando nuevo punto...");
       await this.saveSensorPoint();
-      console.log("Creando nuevo punto...");
+
     } catch (error) {
-      console.error("Error en el proceso de Stack Overflow:", error.message);
+      console.error("Error en el proceso de Steam:", error.message);
     }
   }
+
+  /**
+ * Verifica si existe un usuario en la base de datos y si tiene una cuenta de Steam vinculada.
+ *
+ * @returns {Promise<boolean>} Retorna true si tiene cuenta de Steam, false si no tiene o no hay usuarios.
+ */
 
   async checkUserSteamDB() {
     const users = await UserRepository.getUsers();
     const user = users[0];
-    if (user.key_steam && user.id_user_steam) {
-      console.log('El usuario tiene cuenta de Reddit');
-      return 1;
+
+    const tieneKeySteam = user.key_steam && user.key_steam !== 'null' && user.key_steam.trim() !== '';
+    const tieneIdSteam = user.id_user_steam && user.id_user_steam !== 'null' && user.id_user_steam.trim() !== '';
+
+    if (tieneKeySteam && tieneIdSteam) {
+      console.log('El usuario tiene cuenta en Steam');
+      return true;
     }
-    console.log('El usuario no tiene cuenta de Reddit');
-    return 0;
+
+    console.log('El usuario NO tiene cuenta en Steam');
+    return false;
   }
+
 
   async setDataSteam(key_steam, id_user_steam) {
     const apiUrl = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${key_steam}&steamid=${id_user_steam}&include_appinfo=true&include_played_free_games=true`;
@@ -118,6 +159,20 @@ class SensorPointService {
       throw new Error('Error al actualizar los datos de Steam para el usuario.');
     }
   }
+
+  /**
+ * Obtiene el total de horas de juego de un usuario de Steam utilizando la API pública.
+ *
+ * Realiza una petición HTTP a `https://api.steampowered.com/IPlayerService/GetOwnedGames
+ * /v1/?key=${apiKey}&steamid=${steamId}&include_appinfo=true&include_played_free_games=true`
+ * para obtener la información del usuario y extraer su `playtime_forever`.
+ *
+ * Si el usuario no existe, retorna 0.
+ * Maneja errores de conexión o respuestas inválidas.
+ *
+ * @async
+ * @returns {Promise<number>} Las horas de juego totales del usuario o 0 si hay un error o no se encuentra.
+ */
 
   async getHoursPlayed() {
     const user = await this.userService.getAllUsers();
@@ -264,6 +319,18 @@ class SensorPointService {
         return pointsOutput;
       }
       return pointsOutput;
+    } catch (error) {
+      console.error("No se pudieron obtener los puntos del sensor", error.message);
+    }
+  }
+
+  async getAllPoint() {
+    try {
+      const points = await SensorPointRepository.getAllSensorPoints('Steam');
+      const points1 = await SensorPointRepository.getAllSensorPoints('Reddit');
+      const points2 = await SensorPointRepository.getAllSensorPoints('StackOverflow');
+      const allPoints = [...points, ...points1, ...points2];
+      return allPoints;
     } catch (error) {
       console.error("No se pudieron obtener los puntos del sensor", error.message);
     }

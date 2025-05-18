@@ -23,6 +23,7 @@ router.get('/savePoint', (req, res) => sensorPointController.saveSensorPoint(req
 router.get('/savePointReddit', (req, res) => sensorRedditController.saveSensorPointReddit(req, res));
 router.get('/savePointStack', (req, res) => sensorStackOverflowController.saveSensorPointStackOverflowt(req, res));
 router.post('/allPoints', (req, res) => sensorPointController.getAllSensorPoints(req, res));
+router.post('/all-points', (req, res) => sensorPointController.getAllPoints(req, res));
 router.post('/stack', (req, res) => sensorStackOverflowController.getReputation(req, res));
 router.get('/reddit', (req, res) => sensorRedditController.getKarma(req, res));
 router.get('/callback',(req, res) => sensorRedditController.checkUserReddit(req, res));

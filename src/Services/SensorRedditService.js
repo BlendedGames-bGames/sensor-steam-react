@@ -13,9 +13,17 @@ class SensorRedditService {
     this.userService = new UserService(new UserRepository());
     this.httpClient = axios.create();
 
+    
     // Tarea programada para ejecutarse a las 10 PM todos los días
+    /**
+   * Funcion encargada de ejecutar de forma automatica la funcion de generar puntos bGames. 
+   * Ejecuta el metodo 'saveSensorPoint()' a las 22:01, hora del equipo local.
+   *
+   * @returns {} Se ejecutade forma correcta los servicios bGames esten online y el usuario tenga el sensor Reddit vinculado.
+   * @throws {Error} Si no se puede conectar a los servidores o si el usuario no tiene una cuenta vinculada.
+   */
     cron.schedule(
-      '00 22 * * *',
+      '01 22 * * *',
       async () => {
         console.log("Verificando conexión con servidores...");
         let conectado = await this.sensorPointService.checkServerStatus();
@@ -35,24 +43,51 @@ class SensorRedditService {
         }
       },
       {
-        scheduled: true,
-        timezone: "America/Santiago"
+        scheduled: true
       }
     );
+    
   }
+
+  /**
+ * Ejecuta el proceso principal de sensor de Reddit.
+ *
+ * 1. Verifica si el usuario tiene una cuenta de Reddit vinculada llamando a `checkUserRedditDB`.
+ * 2. Si tiene una cuenta, procede a guardar el punto con `saveSensorPointReddit`.
+ * 3. Si no tiene una cuenta, aborta el proceso.
+ *
+ * Maneja errores que puedan ocurrir durante el proceso.
+ *
+ * @async
+ * @returns {Promise<void>} No retorna ningún valor.
+ */
 
   async ejecutarProceso() {
     try {
-      if (this.checkUserRedditDB() == 0) {
+      if (!await this.checkUserRedditDB()) {
         console.log("No existe una cuenta vinculada...");
         return;
       }
       await this.saveSensorPointReddit();
-      console.log("Creando nuevo punto...");
+      console.log("Usuario válido. Creando nuevo punto...");
     } catch (error) {
       console.error("Error en el proceso de Stack Overflow:", error.message);
     }
   }
+
+  /**
+ * Obtiene el karma total de un usuario de Reddit utilizando la API pública.
+ *
+ * Realiza una petición HTTP a `https://www.reddit.com/user/{username}/about.json`
+ * para obtener la información del usuario y extraer su `total_karma`.
+ *
+ * Si el usuario no tiene karma o no existe, retorna 0.
+ * Maneja errores de conexión o respuestas inválidas.
+ *
+ * @async
+ * @param {string} username - Nombre de usuario de Reddit.
+ * @returns {Promise<number>} El karma total del usuario o 0 si hay un error o no se encuentra.
+ */
 
   async getRedditKarma(username) {
     const apiUrl = `https://www.reddit.com/user/${username}/about.json`;
@@ -77,15 +112,22 @@ class SensorRedditService {
     }
   }
 
+  /**
+ * Verifica si existe un usuario en la base de datos y si tiene una cuenta de Reddit vinculada.
+ *
+ * @returns {Promise<boolean>} Retorna true si tiene cuenta de Reddit, false si no tiene o no hay usuarios.
+ */
+
   async checkUserRedditDB() {
     const users = await UserRepository.getUsers();
     const user = users[0];
-    if (user.id_reddit) {
+    const tieneReddit = user.id_reddit !== 'null' && user.id_reddit && user.id_reddit.trim() !== '';
+    if (tieneReddit) {
       console.log('El usuario tiene cuenta de Reddit');
-      return 1;
+      return true;
     }
-    console.log('El usuario no tiene cuenta de Reddit');
-    return 0;
+    console.log('El usuario NO tiene cuenta de Reddit');
+    return false;
   }
 
   async saveSensorPointReddit() {

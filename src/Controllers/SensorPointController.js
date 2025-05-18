@@ -88,6 +88,22 @@ class SensorPointController {
             });
         }
     }    
+
+    async getAllPoints(req, res) {
+        try {
+            const response = await this.sensorPointService.getAllPoint();
+            res.status(200).json({
+                message: 'Puntos obtenidos exitosamente.',
+                data: response
+            });
+        } catch (error) {
+            console.error('Error al obtener los puntos del senso.', error.message);
+            res.status(500).json({
+                message: 'Error interno del servidor al obtener los puntos del sensor.',
+                error: error.message
+            });
+        }
+    }
 }
 
 export default SensorPointController;

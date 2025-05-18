@@ -64,29 +64,37 @@ function Dashboard() {
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/users/all");
+  const fetchUser = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/users/all");
 
-        if (response.status === 201) {
-          const user = response.data[0];
+      if (response.status === 201) {
+        const user = response.data[0];
 
-          if (user) {
-            setUser({ name: user.name });
-          } else {
-            setErrorMessage("No se encontró ningún usuario.");
-          }
+        if (user) {
+          setUser({ name: user.name });
         } else {
-          setErrorMessage("No se pudo obtener el usuario.");
+          setErrorMessage("No se encontró ningún usuario.");
         }
-      } catch (error) {
-        setErrorMessage("Error al comunicarse con el servidor para obtener usuario.");
+      } else {
+        setErrorMessage("No se pudo obtener el usuario.");
       }
-    };
+    } catch (error) {
+      setErrorMessage("Error al comunicarse con el servidor para obtener usuario.");
+    }
+  };
 
+  fetchPoints();
+  fetchUser();
+
+  // Ejecuta fetchPoints cada 10 segundos
+  const interval = setInterval(() => {
     fetchPoints();
-    fetchUser();
-  }, []);
+  }, 60000); // cada 10 segundos
+
+  return () => clearInterval(interval); // Limpiar intervalo si se desmonta
+}, []);
+
 
   const handleSetView = (view) => {
     setCurrentView(view); // Cambia a la nueva vista

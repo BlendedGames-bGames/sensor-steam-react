@@ -13,9 +13,17 @@ class SensorStackOverflowService {
     this.sensorPointService = new SensorPointService(new SensorPointRepository());
     this.httpClient = axios.create();
 
+    
     // Tarea programada para ejecutarse a las 10 PM todos los días
+    /**
+   * Funcion encargada de ejecutar de forma automatica la funcion de generar puntos bGames. 
+   * Ejecuta el metodo 'saveSensorPoint()' a las 22:02, hora del equipo local.
+   *
+   * @returns {} Se ejecutade forma correcta los servicios bGames esten online y el usuario tenga el sensor Stack Overflow vinculado.
+   * @throws {Error} Si no se puede conectar a los servidores o si el usuario no tiene una cuenta vinculada.
+   */
     cron.schedule(
-      '00 22 * * *',
+      '02 22 * * *',
       async () => {
         console.log("Verificando conexión con servidores...");
         let conectado = await this.sensorPointService.checkServerStatus();
@@ -35,24 +43,50 @@ class SensorStackOverflowService {
         }
       },
       {
-        scheduled: true,
-        timezone: "America/Santiago"
+        scheduled: true
       }
     );
   }
 
+   /**
+ * Ejecuta el proceso principal de sensor de Stack Overflow.
+ *
+ * 1. Verifica si el usuario tiene una cuenta de Stack Overflow vinculada llamando a `checkUserStackOverflowDB`.
+ * 2. Si tiene una cuenta, procede a guardar el punto con `saveSensorPointStackOverflow`.
+ * 3. Si no tiene una cuenta, aborta el proceso.
+ *
+ * Maneja errores que puedan ocurrir durante el proceso.
+ *
+ * @async
+ * @returns {Promise<void>} No retorna ningún valor.
+ */
+
   async ejecutarProceso() {
     try {
-      if (this.checkUserStackOverflowDB() == 0) {
+      if (!await this.checkUserStackOverflowDB()) {
         console.log("No existe una cuenta vinculada...");
         return;
       }
       await this.saveSensorPointStackOverflow();
-      console.log("Creando nuevo punto...");
+      console.log("Usuario válido. Creando nuevo punto...");
     } catch (error) {
       console.error("Error en el proceso de Stack Overflow:", error.message);
     }
   }
+
+  /**
+ * Obtiene la reputacion total de un usuario de Steack Overflow utilizando la API pública.
+ *
+ * Realiza una petición HTTP a `https://api.stackexchange.com/2.3/users/${id_stackO}?site=stackoverflow`
+ * para obtener la información del usuario y extraer su `reputation`.
+ *
+ * Si el usuario no tiene reputacion o no existe, retorna 0.
+ * Maneja errores de conexión o respuestas inválidas.
+ *
+ * @async
+ * @param {string} username - Nombre de usuario de Stack Overflow.
+ * @returns {Promise<number>} El reputacion total del usuario o 0 si hay un error o no se encuentra.
+ */
 
   async getStackOverflowReputation(id_stackO) {
     console.log("ID de usuario en StackOverflow:", id_stackO);
@@ -77,15 +111,22 @@ class SensorStackOverflowService {
     }
   }
 
+  /**
+ * Verifica si existe un usuario en la base de datos y si tiene una cuenta de StackOverflow vinculada.
+ *
+ * @returns {Promise<boolean>} Retorna true si tiene cuenta de StackOverflow, false si no tiene o no hay usuarios.
+ */
+
   async checkUserStackOverflowDB() {
     const users = await UserRepository.getUsers();
     const user = users[0];
-    if (user.id_player_stack) {
+    const tieneStack = user.id_player_stack && user.id_player_stack !== 'null' && user.id_player_stack.trim() !== '';
+    if (tieneStack) {
       console.log('El usuario tiene cuenta de StackOverflow');
-      return 1;
+      return true;
     }
-    console.log('El usuario no tiene cuenta de StackOverflow');
-    return 0;
+    console.log('El usuario NO tiene cuenta de StackOverflow');
+    return false;
   }
 
   async saveSensorPointStackOverflow() {
