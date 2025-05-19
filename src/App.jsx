@@ -12,19 +12,7 @@ function App() {
         // Verificar si existen usuarios en la base de datos
         const response = await axios.get('http://localhost:8080/users/check');
         if (response.status === 200) {
-          // Verificar si el usuario tiene configurados datos de Steam
-          try {
-            const responseSteam = await axios.get('http://localhost:8080/users/checkSteam');
-            if (responseSteam.status === 200) {
-              setView('dashboard'); // Hay usuarios con Steam key
-            }
-          } catch (error) {
-            if (error.response?.status === 404) {
-              setView('dashboard'); // Hay usuarios pero no tienen Steam key
-            } else {
-              console.error('Error en metodo Steam Check', error.message);
-            }
-          }
+          setView('dashboard');
         }
       } catch (error) {
         if (error.response?.status === 404) {

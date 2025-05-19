@@ -16,13 +16,13 @@ function Login({ setView }) { // Recibe setView como prop
         password,
       });
       if (response.status === 201) {
-        setMessage('Usuario creado exitosamente.');
+        setMessage('User created successfully.');
         setView('dashboard'); // Redirige a SteamLogin
       } else {
-        setMessage('Error al crear el usuario.');
+        setMessage('Error creating user.');
       }
     } catch (error) {
-      setMessage('Error del servidor: ' + error.response?.data?.error || error.message);
+      setMessage('Server error: ' + error.response?.data?.error || error.message);
     }
   };
   return (

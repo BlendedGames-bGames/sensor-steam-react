@@ -21,13 +21,13 @@ function RedditView() {
             setHasPlayer(true);
           } else {
             setHasPlayer(false);
-            setMessage('No se encontró ningún usuario.');
+            setMessage('No users found.');
           }
         } else {
-          setMessage('No se pudo obtener el usuario.');
+          setMessage('The user could not be obtained.');
         }
       } catch (error) {
-        setMessage('Error al comunicarse con el servidor para obtener usuario.');
+        setMessage('Error communicating with the server to obtain a user.');
       }
     };
 
@@ -45,10 +45,10 @@ function RedditView() {
           setTodayPoints(today);
           setYesterdayPoints(yesterday);
         } else {
-          setMessage('No se pudieron obtener los puntos de sensor.');
+          setMessage('Sensor points could not be obtained.');
         }
       } catch (error) {
-        setMessage('Error al comunicarse con el servidor para obtener puntos de sensor.');
+        setMessage('Error communicating with the server to obtain sensor points.');
       }
     };
     
@@ -77,21 +77,21 @@ function RedditView() {
           if (response.ok) {
             const data = await response.json();
             if (data.userCreated) {
-              setMessage('Usuario creado exitosamente.');
+              setMessage('User created successfully.');
               setHasPlayer(true);
               clearInterval(intervalId);
             }
           }
         } catch (error) {
-          console.error('Error en la solicitud:', error.message);
+          console.error('Error in the request: ', error.message);
         }
         if (attempts >= 12) {
           clearInterval(intervalId);
-          setMessage('Tiempo de espera agotado. El usuario no se creó.');
+          setMessage('Timeout. User not created. Please try again.');
         }
       }, 5000);
     } catch (error) {
-      setMessage('Error del servidor: ' + error.response?.data?.error || error.message);
+      setMessage('Server error: ' + error.response?.data?.error || error.message);
     }
   };
 

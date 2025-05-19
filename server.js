@@ -21,11 +21,17 @@ app.get('/', (req, res) => {
   res.send('Servidor funcionando correctamente.');
 });
 
+app.get('/ping', (req, res) => res.send('pong'));
+
 // Montar las rutas de usuario
 app.use('/users', UserRoutes);
 
 // Inicia el servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+app.listen(8080, () => {
+  console.log('Backend escuchando en http://localhost:8080');
+  // Enviar mensaje a Electron
+  if (process.send) {
+    process.send('backend-ready');
+  }
 });
 

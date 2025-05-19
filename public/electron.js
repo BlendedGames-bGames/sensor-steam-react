@@ -1,10 +1,10 @@
 
 //-- Copiar si se quiere exportar la aplicacion
-/*
-import { app, BrowserWindow } from 'electron';
+
+import { app, BrowserWindow, Tray, Menu } from 'electron';
 import { fork } from 'child_process';
 import path from 'path';
-import { dirname } from 'path';
+import { dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -12,47 +12,85 @@ const __dirname = dirname(__filename);
 
 let mainWindow;
 let backendProcess;
+let tray;
 
-app.on('ready', () => {
-  // Crear ventana principal
-  mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
-    resizable: false, // Evitar redimensionar
-    maximizable: false, // Evitar maximizar
-    webPreferences: {
-      contextIsolation: true,
-      nodeIntegration: false,
-    },
-  });
+function createWindow() {
+    mainWindow = new BrowserWindow({
+        width: 800,
+        height: 600,
+        title: 'Sensor bGames',
+        resizable: false,
+        maximizable: false,
+        icon: join(__dirname, 'icono.ico'), // Ahora sí puedes usar 'join'
+        webPreferences: {
+            contextIsolation: true,
+            nodeIntegration: false,
+        },
+    });
 
-  // Cargar el frontend empaquetado por Vite
-  const viteDistPath = path.join(__dirname, '../dist/index.html');
-  mainWindow.loadFile(viteDistPath);
+    //mainWindow.loadURL('http://localhost:6969');
 
-  // Levantar el backend como un proceso hijo
-  const backendPath = path.join(__dirname, '../server.js');
-  backendProcess = fork(backendPath);
+    // Oculta la ventana en vez de cerrarla
+    mainWindow.on('close', (e) => {
+        e.preventDefault();
+        mainWindow.hide();
+    });
 
-  backendProcess.on('error', (error) => {
-    console.error('Error en el backend:', error.message);
-  });
+    // Levantar el backend como un proceso hijo
+    const backendPath = path.join(__dirname, '../server.js');
+    backendProcess = fork(backendPath);
 
-  // Cerrar backend al cerrar la aplicación
-  mainWindow.on('closed', () => {
-    mainWindow = null;
-    if (backendProcess) {
-      backendProcess.kill();
-    }
-  });
+    backendProcess.on('error', (error) => {
+        console.error('Error en el backend:', error.message);
+    });
+
+    backendProcess.on('message', (msg) => {
+        if (msg === 'backend-ready') {
+            // Cargar el frontend empaquetado por Vite
+            const viteDistPath = path.join(__dirname, '../dist/index.html');
+            mainWindow.loadFile(viteDistPath);
+        }
+    });
+
+    // Cerrar backend al cerrar la aplicación
+    mainWindow.on('closed', () => {
+        mainWindow = null;
+        if (backendProcess) {
+            backendProcess.kill();
+        }
+    });
+}
+
+app.on('ready', () => { 
+    createWindow();
+
+    tray = new Tray(join(__dirname, 'icono.ico'));
+    const contextMenu = Menu.buildFromTemplate([
+        { label: 'Show', click: () => mainWindow.show() },
+        {
+            label: 'Close', click: () => {
+                tray.destroy();
+                app.quit();
+            }
+        }
+    ]);
+    tray.setToolTip('Sensor bGames');
+    tray.setContextMenu(contextMenu);
+
+    app.setLoginItemSettings({
+        openAtLogin: false,
+    });
 });
+
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+    if (process.platform !== 'darwin') {
+        app.quit();
+    }
 });
-*/
+
+
+
 /*
 import { app, BrowserWindow } from 'electron';
 
@@ -73,11 +111,15 @@ app.on('ready', () => {
     mainWindow.loadURL('http://localhost:6969');
 });
 
+
+
 app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') app.quit();
 });
 */
 
+
+/*
 import { app, BrowserWindow, Tray, Menu } from 'electron';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path'; // ✅ Importa 'join' desde 'path'
@@ -132,4 +174,4 @@ app.on('ready', () => {
 app.on('window-all-closed', (e) => {
     e.preventDefault();
 });
-
+*/

@@ -30,6 +30,7 @@ function Dashboard() {
 
       if (response.status === 200) {
         const pointsData = response.data;
+        setErrorMessage("bGames server is running.");
 
         const newPoints = {
           social: pointsData.find((p) => p.name === "Social")?.data || 0,
@@ -56,10 +57,10 @@ function Dashboard() {
         prevPointsRef.current = newPoints; // Actualiza los puntos anteriores
         setPoints(newPoints);
       } else {
-        setErrorMessage("No se pudieron obtener los puntos.");
+        setErrorMessage("The points could not be obtained.");
       }
     } catch (error) {
-      setErrorMessage("Error al comunicarse con el servidor.");
+      setErrorMessage("Error communicating with the server.");
     }
   };
 
@@ -74,13 +75,13 @@ function Dashboard() {
         if (user) {
           setUser({ name: user.name });
         } else {
-          setErrorMessage("No se encontró ningún usuario.");
+          setErrorMessage("No users found.");
         }
       } else {
-        setErrorMessage("No se pudo obtener el usuario.");
+        setErrorMessage("The user could not be obtained.");
       }
     } catch (error) {
-      setErrorMessage("Error al comunicarse con el servidor para obtener usuario.");
+      setErrorMessage("Error communicating with the server to obtain a user.");
     }
   };
 

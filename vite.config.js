@@ -1,4 +1,4 @@
-/*
+
 //-- Copiar si se quiere exportar la aplicacion
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -11,8 +11,8 @@ export default defineConfig({
   },
   base: './'
 });
-*/
 
+/*
 //-- Configuracion para ejecutar en modo desarrollo
 
 import { defineConfig } from 'vite'
@@ -24,3 +24,4 @@ export default defineConfig({
     port: 6969
   }
 })
+*/

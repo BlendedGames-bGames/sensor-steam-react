@@ -24,10 +24,10 @@ function SteamLogin() {
           setTodayPoints(today);
           setYesterdayPoints(yesterday);
         } else {
-          setMessage("No se pudieron obtener los puntos de sensor.");
+          setMessage("Sensor points could not be obtained.");
         }
       } catch (error) {
-        setMessage("Error al comunicarse con el servidor para obtener puntos de sensor.");
+        setMessage("Error communicating with the server to obtain sensor points.");
       }
     };
 
@@ -43,13 +43,13 @@ function SteamLogin() {
             setHasPlayer(true); // Jugador encontrado
           } else {
             setHasPlayer(false); // Jugador no encontrado
-            setMessage("No se encontró ningún usuario.");
+            setMessage("No users found.");
           }
         } else {
-          setMessage("No se pudo obtener el usuario.");
+          setMessage("The user could not be obtained.");
         }
       } catch (error) {
-        setMessage("Error al comunicarse con el servidor para obtener usuario.");
+        setMessage("Error communicating with the server to obtain a user.");
       }
     };
 
@@ -67,13 +67,13 @@ function SteamLogin() {
       });
 
       if (response.status === 200) {
-        setMessage('Usuario registrado exitosamente.');
+        setMessage('User successfully registered.');
         setHasPlayer(true); // Actualizar el estado para mostrar los puntos
       } else {
-        setMessage('Error al registrar el usuario.');
+        setMessage('Error registering user.');
       }
     } catch (error) {
-      setMessage('Error del servidor: ' + error.response?.data?.error || error.message);
+      setMessage('Server error: ' + error.response?.data?.error || error.message);
     }
   };
 
