@@ -130,6 +130,17 @@ class SensorRedditService {
     return false;
   }
 
+   /**
+ * Guarda un nuevo punto de sensor para la plataforma "Reddit".
+ * 
+ * Esta función verifica si ya existe un punto registrado para el día actual.
+ * Si no existe, calcula la diferencia de Reputacion que ha generado en el dia y crea un nuevo punto
+ * con los datos actualizados. Este punto se asocia con el primer usuario
+ * encontrado en la base de datos y se registra en el repositorio.
+ * 
+ * También se encarga de enviar los puntos al servidor de bGames.
+ */
+
   async saveSensorPointReddit() {
     try {
       console.log("=== Guardando punto de sensor de Reddit... ===");
@@ -216,6 +227,12 @@ class SensorRedditService {
     }
   }
 
+  /**
+  * Almacena las credenciales de la cuenta Reddit en el objeto 'User'. En caso de que el usuario no exista, lanza un error, 
+  * caso contrasrio, actualiza el usuario con las credenciales de Reddit.
+  * para verificar que las credenciales son válidas.
+  */
+
   async createRedditUser(id_reddit) {
     try {
       const users = await UserRepository.getUsers();
@@ -233,6 +250,16 @@ class SensorRedditService {
     }
   }
 
+  /**
+ * Genera puntos basados en el karma ganado en Reddit durante el día.
+ * 
+ * Este sistema de puntuación premia a los usuarios según el karma obtenido:
+ * más karma significa más puntos. También se otorgan puntos incluso si no se gana karma,
+ * para mantener la participación incentivada.
+ * 
+ * @param {number} karma_earned - Karma ganado en el día.
+ * @returns {number} Puntos generados.
+ */
 
   generatePointsReddit(karma_earned) {
     let points;

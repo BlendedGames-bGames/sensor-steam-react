@@ -125,6 +125,13 @@ class SensorPointService {
     return false;
   }
 
+  /**
+  * Almacena las credenciales de de Steam en el objeto 'User'. En caso de que el usuario no exista, lanza un error, 
+  * caso contrasrio, actualiza el usuario con las credenciales de Steam.
+  * Realiza una petición HTTP a `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${key_steam}&steamid=${id_user_steam}
+  * &include_appinfo=true&include_played_free_games=true`
+  * para verificar que las credenciales son válidas.
+  */
 
   async setDataSteam(key_steam, id_user_steam) {
     const apiUrl = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${key_steam}&steamid=${id_user_steam}&include_appinfo=true&include_played_free_games=true`;
@@ -179,7 +186,7 @@ class SensorPointService {
     const apiKey = user[0].key_steam;
     const steamId = user[0].id_user_steam;
 
-    console.log('🔑 API Key:', apiKey);
+    console.log('API Key:', apiKey);
     const apiUrl = `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}&include_appinfo=true&include_played_free_games=true`;
 
     try {
@@ -204,6 +211,17 @@ class SensorPointService {
       return 0;
     }
   }
+
+  /**
+ * Guarda un nuevo punto de sensor para la plataforma "Steam".
+ * 
+ * Esta función verifica si ya existe un punto registrado para el día actual.
+ * Si no existe, calcula la diferencia de horas jugadas y crea un nuevo punto
+ * con los datos actualizados. Este punto se asocia con el primer usuario
+ * encontrado en la base de datos y se registra en el repositorio.
+ * 
+ * También se encarga de enviar los puntos al servidor de bGames.
+ */
 
   async saveSensorPoint() {
     try {
@@ -287,6 +305,18 @@ class SensorPointService {
     }
   }
 
+  /**
+ * Calcula la cantidad de puntos a otorgar según el tiempo jugado (en minutos).
+ * 
+ * La fórmula está diseñada para incentivar sesiones de juego moderadas:
+ * - Hasta 1 hora: se otorgan más puntos mientras más se juegue (hasta 150 puntos).
+ * - Entre 1 y 2 horas: los puntos disminuyen a medida que se extiende el tiempo (hasta 50).
+ * - Más de 2 horas: se otorgan solo 10 puntos fijos.
+ * 
+ * @param {number} minutosJugados - Tiempo jugado en minutos.
+ * @returns {number} Puntos calculados.
+ */
+
   calcularPuntos(minutosJugados) {
     let puntos = 0;
     console.log("Minutos jugados:", minutosJugados);
@@ -336,6 +366,17 @@ class SensorPointService {
     }
   }
 
+  /**
+ * Envía los puntos acumulados del jugador al servidor bGames(ServerStack, Steam y Reddit).
+ * 
+ * Esta función suma los puntos recién generados con los ya existentes (obtenidos desde Bgames),
+ * verifica la conexión con el servidor, y luego realiza una petición HTTP PUT
+ * para actualizar los datos del jugador en un servidor externo.
+ * 
+ * @param {number} points - Puntos generados recientemente.
+ * @param {number} id_attributes - ID del atributo a actualizar (por ejemplo, 25 para Steam).
+ * @param {number} id_player - ID del jugador en la base de datos.
+ */
   async sendPointsToServerStackAndReddit(points, id_attributes, id_player) {
     const totalPoints = await this.getPointBgames(id_player, id_attributes);
     console.log("|||||--------Puntos de Bgames:", totalPoints);

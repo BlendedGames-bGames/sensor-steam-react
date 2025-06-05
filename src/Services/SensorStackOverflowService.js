@@ -129,6 +129,17 @@ class SensorStackOverflowService {
     return false;
   }
 
+  /**
+ * Guarda un nuevo punto de sensor para la plataforma "StackOverflow".
+ * 
+ * Esta función verifica si ya existe un punto registrado para el día actual.
+ * Si no existe, calcula la diferencia de Karma que ha generado en el dia y crea un nuevo punto
+ * con los datos actualizados. Este punto se asocia con el primer usuario
+ * encontrado en la base de datos y se registra en el repositorio.
+ * 
+ * También se encarga de enviar los puntos al servidor de bGames.
+ */
+
   async saveSensorPointStackOverflow() {
     console.log("=== Guardando punto de sensor de StackOverflow... ===");
     try {
@@ -211,6 +222,12 @@ class SensorStackOverflowService {
     }
   }
 
+  /**
+  * Almacena las credenciales de la cuenta StackOverflow en el objeto 'User'. En caso de que el usuario no exista, lanza un error, 
+  * caso contrasrio, actualiza el usuario con las credenciales de StackOverflow.
+  * para verificar que las credenciales son válidas.
+  */
+
   async createStackOverflowUser(id_player_stack, name_stack) {
     console.log('Creando usuario de Stack Overflow...');
     console.log('ID de usuario en Stack Overflow:', id_player_stack);
@@ -234,6 +251,16 @@ class SensorStackOverflowService {
     }
   }
 
+  /**
+ * Genera puntos basados en la reputación diaria ganada en StackOverflow.
+ * 
+ * La lógica premia más a los usuarios que están ganando reputación de forma activa,
+ * otorgando distintos rangos de puntos dependiendo de la cantidad de reputación obtenida.
+ * También contempla escenarios donde no se gana reputación o esta disminuye.
+ * 
+ * @param {number} reputation - Reputación ganada en el día.
+ * @returns {number} Puntos generados.
+ */
   generatePointsStackOverflow(reputation) {
     console.log("Reputation:", reputation);
     let puntos = 0;

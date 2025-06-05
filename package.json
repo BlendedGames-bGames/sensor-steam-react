@@ -7,11 +7,10 @@
   "type": "module",
   "main": "public/electron.js",
   "scripts": {
-    "_comentario": "Reemplazar start para exportar aplicacion por este y agregar comillas -> start: electron-forge start",
     "dev": "vite",
     "electron": "electron .",
     "server": "nodemon server.js",
-    "start": "electron-forge start",
+    "start": "concurrently \"npm run dev\" \"npm run electron\" \"npm run server\"",
     "build": "vite build",
     "make": "electron-forge make",
     "build:frontend": "vite build",

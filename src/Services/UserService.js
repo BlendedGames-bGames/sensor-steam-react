@@ -8,6 +8,18 @@ class UserService {
     this.httpClient = axios.create();
   }
 
+  /**
+ * Crea un nuevo usuario en la base de datos local si existe en la API externa y la contraseña coincide.
+ * 
+ * Esta función hace una llamada a un servicio bGames para obtener los datos del usuario
+ * mediante su correo electrónico. Si la respuesta es exitosa y la contraseña es válida,
+ * se guarda el usuario en la base de datos local.
+ * 
+ * @param {string} email - Correo electrónico del usuario.
+ * @param {string} password - Contraseña del usuario.
+ * @returns {Promise<number>} Retorna 1 si el usuario fue creado correctamente, 0 en caso contrario.
+ */
+
   async createUser(email, password) {
     const apiUrl = `http://localhost:3010/player_by_email/${email}`;
 

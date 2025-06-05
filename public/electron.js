@@ -1,6 +1,5 @@
-
-//-- Copiar si se quiere exportar la aplicacion
-
+//------ Para exportar la aplicacion des-comente el siguiente bloque de código de codigo, de lo contrario funcionara en modo desarrollo ------//
+/*
 import { app, BrowserWindow, Tray, Menu } from 'electron';
 import { fork } from 'child_process';
 import path from 'path';
@@ -89,40 +88,13 @@ app.on('window-all-closed', () => {
     }
 });
 
+//------ Para exportar la aplicacion des-comente el bloque de código de arriba -----//
+*/ 
 
-
-/*
-import { app, BrowserWindow } from 'electron';
-
-let mainWindow;
-
-app.on('ready', () => {
-    mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        resizable: false, // Deshabilitar redimensionar
-        maximizable: false, // Deshabilitar botón de maximizar
-        webPreferences: {
-            contextIsolation: true,
-            nodeIntegration: false,
-        },
-    });
-
-    mainWindow.loadURL('http://localhost:6969');
-});
-
-
-
-app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') app.quit();
-});
-*/
-
-
-/*
+//------ Bloque de codigo para ejecutar la aplicacion en modo desarrollo ------//
 import { app, BrowserWindow, Tray, Menu } from 'electron';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path'; // ✅ Importa 'join' desde 'path'
+import { dirname, join } from 'path'; // Importa 'join' desde 'path'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -136,7 +108,7 @@ function createWindow() {
         height: 600,
         resizable: false,
         maximizable: false,
-        icon: join(__dirname, 'icono.ico'), // ✅ Ahora sí puedes usar 'join'
+        icon: join(__dirname, 'icono.ico'), // Ahora sí puedes usar 'join'
         webPreferences: {
             contextIsolation: true,
             nodeIntegration: false,
@@ -155,7 +127,7 @@ function createWindow() {
 app.on('ready', () => {
     createWindow();
 
-    tray = new Tray(join(__dirname, 'icono.ico')); // ✅ También corregido aquí
+    tray = new Tray(join(__dirname, 'icono.ico'));
     const contextMenu = Menu.buildFromTemplate([
         { label: 'Mostrar', click: () => mainWindow.show() },
         { label: 'Salir', click: () => {
@@ -174,4 +146,3 @@ app.on('ready', () => {
 app.on('window-all-closed', (e) => {
     e.preventDefault();
 });
-*/
