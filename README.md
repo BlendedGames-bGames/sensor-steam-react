@@ -10,7 +10,7 @@ The application includes three sensors, each collecting specific data and conver
 - **Reddit Sensor:** Captures the karma gained during the day.
 - **StackOverflow Sensor:** Tracks the reputation earned on your account throughout the day.
 
-## [Download [Sensor bGames](https://github.com/MoisesGodoy17/sensor-steam-react/releases/tag/sensor-bgames)]  
+## [Download [Sensor bGames](https://github.com/MoisesGodoy17/sensor-steam-react/releases/tag/sensor-bGames-v.1.1)]  
 
 # Sensor Features:
 
@@ -37,8 +37,10 @@ The application includes three sensors, each collecting specific data and conver
 # How to run the bGames sensor
 
 - You need to download the cloud services from [bGames](https://github.com/BlendedGames-bGames/bGames-dev-services.git).
-- Download the [aplication](https://github.com/MoisesGodoy17/sensor-steam-react/releases/tag/sensor-bgames)
-- Navigate to the `sensor-steam-react-win32-x64` folder and click on the `sensor-steam-react.exe` executable.
+- Download the [aplication](https://github.com/MoisesGodoy17/sensor-steam-react/releases/tag/sensor-bGames-v.1.1)
+- Extract the `sensor-bgames-v1.1.rar` file and click the `bGames-sensor-installer.bat` executable to install the sensor.
+- Make sure you have Node.js version 22.11 installed. Otherwise, the Node.js 22.11 installer is included in the .rar file.
+- Navigate to the `\sensor-steam-react\out\sensor-steam-react-win32-x64` folder and click the `sensor-steam-react.exe` executable.
 
 (**The sensor captures data at 22:00, so the application must be running for it to function correctly.**)
 
