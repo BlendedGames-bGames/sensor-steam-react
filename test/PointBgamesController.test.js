@@ -113,3 +113,4 @@ describe('PointBgamesController - Pruebas de Integración', () => {
     
   });
 });
+
