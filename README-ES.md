@@ -7,7 +7,7 @@ La aplicación cuenta con tres sensores, cada uno recopila información y transf
 - **Sensor Reddit:** Captura el karma obtenido en el día.
 - **Sensor StackOverflow:** Recopila la reputación obtenida en la cuenta durante el día.
 
-## [Download [Sensor bGames](https://github.com/MoisesGodoy17/sensor-steam-react/releases/tag/sensor-bGames-v.1.1))]  
+## [Download [Sensor bGames](https://github.com/MoisesGodoy17/sensor-steam-react/releases/tag/sensor-bGames-v.1.1)]  
 
 # Funcionalidades del sensor:
 
